@@ -6,7 +6,7 @@ Projet techniques web
 + Protocole d'authentification des utilisateurs
 + Écriture et lecture de données JSON avec Postman (requêtes HTTP)
 + Configuration du serveur Nginx
-+ Sécurisation de l'API
++ Sécurisation de l'API (voir fiches de synthèse de l'ACNIL: https://github.com/LINCnil/Guide-RGPD-du-developpeur)
 + Rédaction du manuel d'utilisation + code propre et commenté
 
 2) FRONT END?
