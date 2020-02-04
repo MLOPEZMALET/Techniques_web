@@ -126,8 +126,6 @@ def json_delete():
             return make_response(jsonify({"message": "Wrong data structure, check these fields exist in your request: "+ str(js.required_delete_keys)}), 400)
     else:
         return make_response(jsonify({"message": "Request body must be JSON"}), 400)
-
-
+    
 if __name__ == '__main__':
-    app.secret_key = os.urandom(12)
-    app.run(debug=True)
+    app.run(debug=True, port=8888)
