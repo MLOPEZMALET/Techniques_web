@@ -39,6 +39,11 @@ python3 requests_api_run.py
 # wsgi permettra l'exécution de notre applicatiob
 nano wsgi.py
 
+#écrire le code suivant dans l'éditeur
+from requests_api_run import app
+if __name__ == "__main__":
+    app.run()
+
 # installation de gunicorn
 sudo apt-get update
 sudo apt-get install gunicorn
@@ -56,8 +61,8 @@ echo_supervisord_conf > supervisord.conf
 # création du dossier qui contiendra nos fichiers .conf pour les applications
 mkdir /home/feylia/environnements/virtenvTW/lib/python3.7/site-packages/supervisor/conf.d/
 
-# création du fichier .conf pour notre application (il se trouve dans notre archive)
-touch /home/feylia/environnements/virtenvTW/lib/python3.7/site-packages/supervisor/conf.d/api_cepty.conf
+# fichier .conf pour notre application: 
+# le récupérer dans le livrable, et le placer au chemin sui
 sudo nano /home/feylia/environnements/virtenvTW/lib/python3.7/site-packages/supervisor/conf.d/api_cepty.conf
 
 # création des fichiers log pour notre application
