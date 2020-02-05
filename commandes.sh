@@ -62,7 +62,7 @@ echo_supervisord_conf > supervisord.conf
 mkdir /home/feylia/environnements/virtenvTW/lib/python3.7/site-packages/supervisor/conf.d/
 
 # fichier .conf pour notre application: 
-# le récupérer dans le livrable, et le placer au chemin sui
+# le récupérer dans le livrable, et le placer au chemin suivant (à adapter à votre machine)
 sudo nano /home/feylia/environnements/virtenvTW/lib/python3.7/site-packages/supervisor/conf.d/api_cepty.conf
 
 # création des fichiers log pour notre application
@@ -84,8 +84,8 @@ sudo apt-get install nginx
 # ajout du nom du serveur ceptyconsultant.local pour l'adresse 127.0.0.1
 sudo nano /etc/hosts
 
-# création du fichier conf pour notre application
-sudo nano /etc/nginx/sites-available/nginx_api_cepty.conf
+# placer le fichier de configuration nginx_api_cepty.conf au chemin suivant (adapté à votre machine)
+sudo /etc/nginx/sites-available/nginx_api_cepty.conf
 
 # activation de notre fichier conf en créant un lien vers site-enabled
 sudo ln -s /etc/nginx/sites-available/nginx_api_cepty.conf /etc/nginx/sites-enabled/
@@ -99,6 +99,5 @@ sudo service nginx restart
 # installation de certbot pour les certificats
 sudo add-apt-repository ppa:certbot/certbot
 sudo apt install python-certbot-nginx
-# la ligne suivante ne fonctionne pas pour moi
 sudo certbot --nginx -d ceptyconsultant.local -d www.ceptyconsultant.local
 
