@@ -1,11 +1,11 @@
-from flask import Flask
+pythfrom flask import Flask
 from flask import request, jsonify, make_response, flash, redirect, render_template, session, abort
 from flask_restful import Api
 import wrangling_json_data as js
 import os
 
 # python3.7 -m pip install Flask-HTTPAuth
-# Importation des module pour l'authentification et la sécurité des mots de passe
+# Importation des modules pour l'authentification et la sécurité des mots de passe
 from flask_httpauth import HTTPBasicAuth
 from werkzeug.security import generate_password_hash, check_password_hash
 
@@ -126,6 +126,6 @@ def json_delete():
             return make_response(jsonify({"message": "Wrong data structure, check these fields exist in your request: "+ str(js.required_delete_keys)}), 400)
     else:
         return make_response(jsonify({"message": "Request body must be JSON"}), 400)
-    
+
 if __name__ == '__main__':
     app.run(debug=True, host="0.0.0.0")
