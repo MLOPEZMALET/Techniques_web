@@ -24,13 +24,11 @@ cd environnements/
 python3.7 -m virtualenv virtenvTW
 source virtenvTW/bin/activate
 
-cd ..
-cd Documents/
-
 # installation de flask et flask-httpAuth
 python3 -m pip install flask flask_restful
 python3.7 -m pip install Flask-HTTPAuth
 
+#aller au dossier de l'application (adapter à votre machine)
 cd Documents/technique_web/api_project/
 
 # exécution de notre application flask
@@ -54,11 +52,11 @@ python3 -m pip install supervisor
 echo_supervisord_conf > supervisord.conf
 
 # création du dossier qui contiendra nos fichiers .conf pour les applications
-mkdir /home/feylia/environnements/virtenvTW/lib/python3.7/site-packages/supervisor/conf.d/
+mkdir /home/username/environnements/virtenvTW/lib/python3.7/site-packages/supervisor/conf.d/
 
 # création du fichier .conf pour notre application (il se trouve dans notre archive)
-touch /home/feylia/environnements/virtenvTW/lib/python3.7/site-packages/supervisor/conf.d/api_cepty.conf
-sudo nano /home/feylia/environnements/virtenvTW/lib/python3.7/site-packages/supervisor/conf.d/api_cepty.conf
+touch /home/username/environnements/virtenvTW/lib/python3.7/site-packages/supervisor/conf.d/api_cepty.conf
+sudo nano /home/username/environnements/virtenvTW/lib/python3.7/site-packages/supervisor/conf.d/api_cepty.conf
 
 # création des fichiers log pour notre application
 > log/gunicorn.log
