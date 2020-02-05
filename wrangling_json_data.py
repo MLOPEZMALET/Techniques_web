@@ -42,7 +42,7 @@ def delete_data(data_number, path):
 
 
 # Chemin relatif vers la BD JSON
-path_all = "../Données/DONNEES_CLIENT.json"
+path_all = "../Data/DONNEES_CLIENT.json"
 # Liste des clés nécessaires au bon formatage des données JSON
 required_write_keys = ['public_id', 'dico_id', 'user_id', 'user_name', 'article_id', 'contrib_type', 'contrib_data', 'contrib_path', 'contrib_name', 'ntealan', 'validate', 'last_update']
 required_update_keys = ["field", "data_number", "new_data"]
