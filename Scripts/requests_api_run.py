@@ -1,4 +1,4 @@
-pythfrom flask import Flask
+from flask import Flask
 from flask import request, jsonify, make_response, flash, redirect, render_template, session, abort
 from flask_restful import Api
 import wrangling_json_data as js
