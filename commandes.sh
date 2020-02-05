@@ -1,8 +1,3 @@
-# création d'un dossier qui va contenir l'environnement virtuel pour notre projet
-# fait dans le dossier /home
-mkdir environnements
-cd environnements/
-
 # mise à jour d'ubuntu
 sudo apt-get clean
 sudo apt-get autoclean
@@ -19,8 +14,12 @@ curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py
 sudo python3.7 get-pip.py
 sudo python3.7 -m pip install virtualenv
 
-# création d'un environnement virtuel virtenvTW
+# création d'un dossier qui va contenir l'environnement virtuel pour notre projet
+# fait dans le dossier /home
+mkdir environnements
 cd environnements/
+
+# création d'un environnement virtuel virtenvTW
 python3.7 -m virtualenv virtenvTW
 source virtenvTW/bin/activate
 
@@ -28,7 +27,7 @@ source virtenvTW/bin/activate
 python3 -m pip install flask flask_restful
 python3.7 -m pip install Flask-HTTPAuth
 
-#aller au dossier de l'application (adapter à votre machine)
+# aller au dossier de l'application (adapter à votre machine)
 cd Documents/technique_web/api_project/
 
 # exécution de notre application flask
