@@ -39,11 +39,6 @@ python3 requests_api_run.py
 # wsgi permettra l'exécution de notre applicatiob
 nano wsgi.py
 
-#écrire le code suivant dans l'éditeur
-from requests_api_run import app
-if __name__ == "__main__":
-    app.run()
-
 # installation de gunicorn
 sudo apt-get update
 sudo apt-get install gunicorn
@@ -61,8 +56,8 @@ echo_supervisord_conf > supervisord.conf
 # création du dossier qui contiendra nos fichiers .conf pour les applications
 mkdir /home/feylia/environnements/virtenvTW/lib/python3.7/site-packages/supervisor/conf.d/
 
-# fichier .conf pour notre application: 
-# le récupérer dans le livrable, et le placer au chemin suivant (à adapter à votre machine)
+# création du fichier .conf pour notre application (il se trouve dans notre archive)
+touch /home/feylia/environnements/virtenvTW/lib/python3.7/site-packages/supervisor/conf.d/api_cepty.conf
 sudo nano /home/feylia/environnements/virtenvTW/lib/python3.7/site-packages/supervisor/conf.d/api_cepty.conf
 
 # création des fichiers log pour notre application
@@ -81,11 +76,11 @@ supervisorctl
 # installation de nginx
 sudo apt-get install nginx
 
-# ajout du nom du serveur ceptyconsultant.local pour l'adresse 127.0.0.1
+# ajout du nom du serveur ceptyconsultant.local et www.ceptyconsultant.local pour l'adresse 127.0.0.1 afin que le navigateur ne recherche pas en ligne
 sudo nano /etc/hosts
 
-# placer le fichier de configuration nginx_api_cepty.conf au chemin suivant (adapté à votre machine)
-sudo /etc/nginx/sites-available/nginx_api_cepty.conf
+# création du fichier conf pour notre application
+sudo nano /etc/nginx/sites-available/nginx_api_cepty.conf
 
 # activation de notre fichier conf en créant un lien vers site-enabled
 sudo ln -s /etc/nginx/sites-available/nginx_api_cepty.conf /etc/nginx/sites-enabled/
@@ -96,7 +91,12 @@ sudo nginx -t
 # recharger nginx
 sudo service nginx restart
 
-# installation de certbot pour les certificats
-sudo add-apt-repository ppa:certbot/certbot
-sudo apt install python-certbot-nginx
-sudo certbot --nginx -d ceptyconsultant.local -d www.ceptyconsultant.local
+# sécurité
+
+# on crée un autre fichier ou on met des configurations de sécurité pour ne pas "polluer" la configuration de nginx
+sudo nano /etc/nginx/snippets/secu-params.conf
+# on écrit le contenu qui se trouve dans le fichier secu-params.conf dans l'annexe
+
+# on édite le fichier (se trouve en annexe)
+sudo nano /etc/nginx/sites-available/nginx_api_cepty.conf
+
