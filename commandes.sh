@@ -1,8 +1,3 @@
-# création d'un dossier qui va contenir l'environnement virtuel pour notre projet
-# fait dans le dossier /home
-mkdir environnements
-cd environnements/
-
 # mise à jour d'ubuntu
 sudo apt-get clean
 sudo apt-get autoclean
@@ -19,18 +14,20 @@ curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py
 sudo python3.7 get-pip.py
 sudo python3.7 -m pip install virtualenv
 
-# création d'un environnement virtuel virtenvTW
+# création d'un dossier qui va contenir l'environnement virtuel pour notre projet
+# fait dans le dossier /home
+mkdir environnements
 cd environnements/
+
+# création d'un environnement virtuel virtenvTW
 python3.7 -m virtualenv virtenvTW
 source virtenvTW/bin/activate
-
-cd ..
-cd Documents/
 
 # installation de flask et flask-httpAuth
 python3 -m pip install flask flask_restful
 python3.7 -m pip install Flask-HTTPAuth
 
+# aller au dossier de l'application (adapter à votre machine)
 cd Documents/technique_web/api_project/
 
 # exécution de notre application flask
@@ -54,11 +51,11 @@ python3 -m pip install supervisor
 echo_supervisord_conf > supervisord.conf
 
 # création du dossier qui contiendra nos fichiers .conf pour les applications
-mkdir /home/feylia/environnements/virtenvTW/lib/python3.7/site-packages/supervisor/conf.d/
+mkdir /home/username/environnements/virtenvTW/lib/python3.7/site-packages/supervisor/conf.d/
 
 # création du fichier .conf pour notre application (il se trouve dans notre archive)
-touch /home/feylia/environnements/virtenvTW/lib/python3.7/site-packages/supervisor/conf.d/api_cepty.conf
-sudo nano /home/feylia/environnements/virtenvTW/lib/python3.7/site-packages/supervisor/conf.d/api_cepty.conf
+touch /home/username/environnements/virtenvTW/lib/python3.7/site-packages/supervisor/conf.d/api_cepty.conf
+sudo nano /home/username/environnements/virtenvTW/lib/python3.7/site-packages/supervisor/conf.d/api_cepty.conf
 
 # création des fichiers log pour notre application
 > log/gunicorn.log
