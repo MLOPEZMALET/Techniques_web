@@ -128,4 +128,4 @@ def json_delete():
         return make_response(jsonify({"message": "Request body must be JSON"}), 400)
     
 if __name__ == '__main__':
-    app.run(debug=True, port=8888)
+    app.run(debug=True, host="0.0.0.0")
