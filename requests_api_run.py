@@ -1,6 +1,7 @@
 from flask import Flask
 from flask import request, jsonify, make_response, flash, redirect, render_template, session, abort
 from flask_restful import Api
+from flask import Response
 import wrangling_json_data as js
 import os
 
@@ -32,13 +33,32 @@ def verify_password(username, password):
 
 # Page d'accueil
 @app.route("/")
-@auth.login_required # l'accès n'est autorisé que pour les utilisateurs authentifiés
-
 def index():
-    return "Hello, %s!" % auth.username()
+    return "Ceptyconsultant says Hello"
+
+#contribution
+@app.route("/contribution", methods=["GET"])
+def contrib():
+    data = js.read_data(js.path_all)
+    return render_template("contributions.html", params=data)
+
+#Login
+@app.route("/login", methods=["GET"])
+#@auth.login_required # l'accès n'est autorisé que pour les utilisateurs authentifiés
+def login():
+    return render_template("login.html")
+    #return "Hello, %s!" % auth.username()
+
+@app.route("/login", methods=["POST"])
+#@auth.login_required # l'accès n'est autorisé que pour les utilisateurs authentifiés
+def login2():
+    other = request.form
+    print(other)
+    return "Bienvenue!"
+    #return "Hello, %s!" % auth.username()
 
 # POST: Permet d'ajouter une contribution à la BD
-@app.route("/", methods=["POST"])
+@app.route("/add_contrib", methods=["POST"])
 @auth.login_required
 def json_post():
     # vérification du format de la requête (JSON + clés requises)
@@ -95,7 +115,7 @@ def json_read_num_field(num, field):
 
 
 # PUT: Modifie la valeur d'un champ dans une contribution donnée. Si aucun numéro de contribution n'est indiqué, le champ sera modifié dans toutes les contributions
-@app.route("/", methods=["PUT"])
+@app.route("/update_contrib", methods=["PUT"])
 @auth.login_required
 def json_updated():
     if request.is_json:
@@ -113,7 +133,7 @@ def json_updated():
 
 
 # DELETE: efface la contribution numéro x (x donné dans la requête)
-@app.route("/", methods=["DELETE"])
+@app.route("/delete_contrib", methods=["DELETE"])
 @auth.login_required
 def json_delete():
     if request.is_json:
