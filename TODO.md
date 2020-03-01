@@ -20,6 +20,8 @@ REQUÊTES
 - Modifier les requêtes
 - Formater les réponses: done
 - Modifier les URL: done
+- faire une requête par matching (?)
+- modifier la création de contribution: il ne faut pas préciser d'ID
 
 QUESTIONS À POSER
 - Où a lieu le login? ouverture de session? supprimer @auth.login_required?
