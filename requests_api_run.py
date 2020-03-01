@@ -3,7 +3,6 @@ from flask import request, jsonify, make_response, flash, redirect, render_templ
 from flask_restful import Api
 from flask import Response
 import wrangling_json_data as js
-import os
 
 # python3.7 -m pip install Flask-HTTPAuth
 # Importation des modules pour l'authentification et la sécurité des mots de passe
@@ -24,6 +23,7 @@ users = {
     "Gate": generate_password_hash("password"),
     "Fokwe": generate_password_hash("password")
 }
+
 
 @auth.verify_password
 def verify_password(username, password):
@@ -49,6 +49,7 @@ def login():
     return render_template("login.html")
     #return "Hello, %s!" % auth.username()
 
+
 @app.route("/login", methods=["POST"])
 #@auth.login_required # l'accès n'est autorisé que pour les utilisateurs authentifiés
 def login2():
@@ -73,7 +74,7 @@ def json_post():
             res = make_response(jsonify(response_body), 200)
             return res
         else:
-            return make_response(jsonify({"message": "Wrong data structure, check these fields exist in your request: "+ str(js.required_keys)}), 400)
+            return make_response(jsonify({"message": "Wrong data structure, check these fields exist in your request: " + str(js.required_keys)}), 400)
     else:
         return make_response(jsonify({"message": "Request body must be JSON"}), 400)
 
@@ -127,7 +128,7 @@ def json_updated():
             js.update_data(category, new_data, js.path_all, data_number=None)
             return "Data successfully updated!"
         else:
-            return make_response(jsonify({"message": "Wrong data structure, check these fields exist in your request: "+ str(js.required_update_keys)}), 400)
+            return make_response(jsonify({"message": "Wrong data structure, check these fields exist in your request: " + str(js.required_update_keys)}), 400)
     else:
         return make_response(jsonify({"message": "Request body must be JSON"}), 400)
 
@@ -143,9 +144,10 @@ def json_delete():
             js.delete_data(data_number, js.path_all)
             return "Data successfully deleted!"
         else:
-            return make_response(jsonify({"message": "Wrong data structure, check these fields exist in your request: "+ str(js.required_delete_keys)}), 400)
+            return make_response(jsonify({"message": "Wrong data structure, check these fields exist in your request: " + str(js.required_delete_keys)}), 400)
     else:
         return make_response(jsonify({"message": "Request body must be JSON"}), 400)
+
 
 if __name__ == '__main__':
     app.run(debug=True, host="0.0.0.0")
