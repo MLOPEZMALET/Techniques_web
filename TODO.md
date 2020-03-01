@@ -17,7 +17,6 @@ SÉCURITÉ
 - Demander aux autres groupes s'ils ont réussi à être en https et s'ils ont "le cadenas"
 
 REQUÊTES
-- Modifier les requêtes
 - Formater les réponses: done
 - Modifier les URL: done
 - faire une requête par matching (?)
