@@ -22,6 +22,7 @@ REQUÊTES
 - Modifier les URL: done
 - faire une requête par matching (?)
 - modifier la création de contribution: il ne faut pas préciser d'ID
+- juste besoin de l'ID pour supprimer une contribution
 
 QUESTIONS À POSER
 - Où a lieu le login? ouverture de session? supprimer @auth.login_required?
