@@ -2,6 +2,7 @@ from flask import Flask
 from flask import request, jsonify, make_response, flash, redirect, render_template, session, abort
 from flask_restful import Api
 from flask import Response
+import datetime
 import wrangling_json_data as js
 
 # python3.7 -m pip install Flask-HTTPAuth
@@ -67,8 +68,10 @@ def json_post():
         req = request.get_json()
         if sorted(list(req.keys())) == sorted(js.required_write_keys):
             response_body = {
-                "message": "JSON received!",
-                "sender": req.get("user_name")
+                "message": "contribution received!",
+                "sender": req.get("user_name"),
+                "timestamp": datetime.datetime.now(),
+                "contrib_name": req.get("contrib_name")
             }
             js.write_data(req, js.path_all)
             res = make_response(jsonify(response_body), 200)
@@ -126,7 +129,15 @@ def json_updated():
             data_number = req["data_number"]
             new_data = req["new_data"]
             js.update_data(category, new_data, js.path_all, data_number=None)
-            return "Data successfully updated!"
+            response_body = {
+                "message": "Data successfully updated!",
+                "timestamp": datetime.datetime.now(),
+                "field": category,
+                "data_number": data_number,
+                "new_data": new_data
+            }
+            res = make_response(jsonify(response_body), 200)
+            return res
         else:
             return make_response(jsonify({"message": "Wrong data structure, check these fields exist in your request: " + str(js.required_update_keys)}), 400)
     else:
@@ -142,7 +153,13 @@ def json_delete():
         if sorted(req.keys()) == sorted(js.required_delete_keys):
             data_number = req["data_number"]
             js.delete_data(data_number, js.path_all)
-            return "Data successfully deleted!"
+            response_body = {
+                "message": "Data successfully deleted!",
+                "timestamp": datetime.datetime.now(),
+                "data_deleted": req
+            }
+            res = make_response(jsonify(response_body), 200)
+            return res
         else:
             return make_response(jsonify({"message": "Wrong data structure, check these fields exist in your request: " + str(js.required_delete_keys)}), 400)
     else:
