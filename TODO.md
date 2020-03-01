@@ -1,6 +1,7 @@
 TODO
 
-ENVIRONNEMENT VIRTUEL
+DEVELOPPEMENT
+- faire des unitest
 - utiliser pipenv
 - générer requirements.txt
 
@@ -10,6 +11,8 @@ DOCUMENTATION
 - créer la documentation technique (fichier .sh devient .txt)
 
 SÉCURITÉ
+- log: "la création des logs va poser un problème: log/gunicorn.log , ici c'est nginx qui crée ce
+        fichier et non vous avec —acces-log"
 - Rendre la BD dynamique: création et suppression d'utilisateurs, modification de mots de passe
   -->attention: il faudra implémenter ces fonctionnalités en front-end aussi
 - Sécurité par tokens: JWT ou uuid (python)
