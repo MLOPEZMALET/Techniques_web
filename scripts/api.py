@@ -144,7 +144,6 @@ def logout():
     # Déconnexion de l'utilisateur
     if not session.get('logged_in'):
         return redirect(url_for('login'))
-    verify_password("", "")
     session.pop('username', None)
     session['logged_in'] = False
     return redirect(url_for('index'))
