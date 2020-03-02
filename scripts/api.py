@@ -1,5 +1,7 @@
 import os
-from flask import Flask, abort, request, jsonify, g, url_for
+import datetime
+
+from flask import Flask, abort, request, jsonify, g, url_for, Response
 from flask import make_response, flash, redirect, render_template, session
 
 # Importation des modules pour l'authentification et la sécurité des mots de passe
@@ -76,7 +78,7 @@ def index():
 
 # Page de profile
 @app.route('/profile')
-@auth.login_required
+@auth.login_required # l'accès n'est autorisé que pour les utilisateurs authentifiés
 def profile():
     if not session.get('logged_in'):
         return redirect(url_for('login'))
@@ -146,7 +148,7 @@ def logout():
     return redirect(url_for('index'))
 
 # Page des contributions
-@app.route('/contributions')
+@app.route('/contributions', methods=["GET"])
 @auth.login_required
 def contrib():
     data = js.read_data(js.path_all)
@@ -193,7 +195,7 @@ def get_resource():
 
 
 # POST: Permet d'ajouter une contribution à la BD
-@app.route("/api/resource/query", methods=["POST"])
+@app.route("/api/resource/add_contrib", methods=["POST"])
 @auth.login_required
 def json_post():
     # vérification du format de la requête (JSON + clés requises)
@@ -202,7 +204,9 @@ def json_post():
         if sorted(list(req.keys())) == sorted(js.required_write_keys):
             response_body = {
                 "message": "JSON received!",
-                "sender": req.get("user_name")
+                "sender": req.get("user_name"),
+                "timestamp": datetime.datetime.now(),
+                "contrib_name": req.get("contrib_name")
             }
             js.write_data(req, js.path_all)
             res = make_response(jsonify(response_body), 200)
@@ -213,14 +217,14 @@ def json_post():
         return make_response(jsonify({"message": "Request body must be JSON"}), 400)
 
 # GET: Permet de parser le fichier JSON pour consulter des données (ici, toutes)
-@app.route("/api/resource/query", methods=["GET"])
+@app.route("/api/resource/get", methods=["GET"])
 @auth.login_required
 def json_read():
     data = js.read_data(js.path_all)
     return make_response(jsonify(data))
 
 # GET: l'ajout du nombre x dans l'url permet d'accéder à la contribution numéro x
-@app.route("/api/resource/query/<int:num>", methods=["GET"])
+@app.route("/api/resource/get/<int:num>", methods=["GET"])
 @auth.login_required
 def json_read_num(num):
     data = js.read_data(js.path_all)
@@ -228,7 +232,7 @@ def json_read_num(num):
     return make_response(jsonify(data))
 
 # GET: l'ajout du champ y dans l'url permet d'accéder à ce champ dans toutes les contributions
-@app.route("/api/resource/query/<string:field>", methods=["GET"])
+@app.route("/api/resource/get/<string:field>", methods=["GET"])
 @auth.login_required
 def json_read_field(field):
     data = js.read_data(js.path_all)
@@ -238,7 +242,7 @@ def json_read_field(field):
     return make_response(jsonify(fields))
 
 # GET: l'ajout du nombre x + champ y dans l'url permet d'accéder au champ y de la contribution x
-@app.route("/api/resource/query/<int:num>/<string:field>", methods=["GET"])
+@app.route("/api/resource/get/<int:num>/<string:field>", methods=["GET"])
 @auth.login_required
 def json_read_num_field(num, field):
     data = js.read_data(js.path_all)
@@ -246,7 +250,7 @@ def json_read_num_field(num, field):
     return make_response(jsonify(data))
 
 # PUT: Modifie la valeur d'un champ dans une contribution donnée. Si aucun numéro de contribution n'est indiqué, le champ sera modifié dans toutes les contributions
-@app.route("/api/resource/query", methods=["PUT"])
+@app.route("/api/resource/update_contrib", methods=["PUT"])
 @auth.login_required
 def json_updated():
     if request.is_json:
@@ -256,14 +260,22 @@ def json_updated():
             data_number = req["data_number"]
             new_data = req["new_data"]
             js.update_data(category, new_data, js.path_all, data_number=None)
-            return "Data successfully updated!"
+            response_body = {
+                "message": "Data successfully updated!",
+                "timestamp": datetime.datetime.now(),
+                "field": category,
+                "data_number": data_number,
+                "new_data": new_data
+            }
+            res = make_response(jsonify(response_body), 200)
+            return res
         else:
             return make_response(jsonify({"message": "Wrong data structure, check these fields exist in your request: "+ str(js.required_update_keys)}), 400)
     else:
         return make_response(jsonify({"message": "Request body must be JSON"}), 400)
 
 # DELETE: efface la contribution numéro x (x donné dans la requête)
-@app.route("/api/resource/query", methods=["DELETE"])
+@app.route("/api/resource/delete_contrib", methods=["DELETE"])
 @auth.login_required
 def json_delete():
     if request.is_json:
@@ -271,7 +283,13 @@ def json_delete():
         if sorted(req.keys()) == sorted(js.required_delete_keys):
             data_number = req["data_number"]
             js.delete_data(data_number, js.path_all)
-            return "Data successfully deleted!"
+            response_body = {
+                "message": "Data successfully deleted!",
+                "timestamp": datetime.datetime.now(),
+                "data_deleted": req
+            }
+            res = make_response(jsonify(response_body), 200)
+            return res
         else:
             return make_response(jsonify({"message": "Wrong data structure, check these fields exist in your request: "+ str(js.required_delete_keys)}), 400)
     else:
@@ -281,4 +299,4 @@ if __name__ == '__main__':
     # Création de la base de données des utilisateurs si elle n'existe pas
     if not os.path.exists('db.sqlite'):
         db.create_all()
-    app.run(debug=True)
+    app.run(debug=True, host="0.0.0.0")
