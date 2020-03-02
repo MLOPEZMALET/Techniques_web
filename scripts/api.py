@@ -88,8 +88,8 @@ def profile():
 # Page d'authentification qui apparait aux personnes non connectées
 @app.route('/login')
 def login():
-    # if session.get('logged_in'):
-        # return redirect(url_for('profile'))
+    if session.get('logged_in'):
+        return redirect(url_for('profile'))
     return render_template('login.html', logged=session.get('logged_in'))
 
 @app.route('/login', methods=['POST'])
@@ -119,7 +119,6 @@ def signup():
 @app.route('/signup', methods=['POST'])
 def signup_post():
     # Ajout d'un utilisateur dans la base de données
-    
     username = request.form.get('username')
     password = request.form.get('password')
     
