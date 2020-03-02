@@ -78,7 +78,7 @@ def index():
 
 # Page de profile
 @app.route('/profile')
-@auth.login_required # l'accès n'est autorisé que pour les utilisateurs authentifiés
+# @auth.login_required # l'accès n'est autorisé que pour les utilisateurs authentifiés
 def profile():
     if not session.get('logged_in'):
         return redirect(url_for('login'))
@@ -140,9 +140,11 @@ def signup_post():
     return redirect(url_for('login'))
 
 @app.route('/logout')
-@auth.login_required
+# @auth.login_required
 def logout():
     # Déconnexion de l'utilisateur
+    if not session.get('logged_in'):
+        return redirect(url_for('login'))
     verify_password("", "")
     session.pop('username', None)
     session['logged_in'] = False
@@ -150,7 +152,7 @@ def logout():
 
 # Page des contributions
 @app.route('/contributions', methods=["GET"])
-@auth.login_required
+# @auth.login_required
 def contrib():
     if not session.get('logged_in'):
         return redirect(url_for('login'))
