@@ -2,8 +2,8 @@ TODO
 
 DEVELOPPEMENT
 - faire des unitest
-- utiliser pipenv
-- générer requirements.txt
+- utiliser pipenv: done
+- générer requirements.txt: done
 
 DOCUMENTATION
 - mieux préciser comment on répond au besoin du client
@@ -28,4 +28,3 @@ REQUÊTES
 
 QUESTIONS À POSER
 - Où a lieu le login? ouverture de session? supprimer @auth.login_required?
-- 
