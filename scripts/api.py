@@ -143,6 +143,7 @@ def signup_post():
 @auth.login_required
 def logout():
     # Déconnexion de l'utilisateur
+    verify_password("", "")
     session.pop('username', None)
     session['logged_in'] = False
     return redirect(url_for('index'))
@@ -151,8 +152,10 @@ def logout():
 @app.route('/contributions', methods=["GET"])
 @auth.login_required
 def contrib():
+    if not session.get('logged_in'):
+        return redirect(url_for('login'))
     data = js.read_data(js.path_all)
-    return render_template("contrib.html", logged=True, params=data)
+    return render_template("contrib.html", logged=session.get('logged_in'), params=data)
 
 """ Partie pour l'API """
 
