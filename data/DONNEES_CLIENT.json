@@ -17,48 +17,6 @@
             "last_update": "2019-09-03 19:32:51.447000"
          },
          {
-            "public_id": "8ad93a62-9437-416f-93c6-948a2c15b45b",
-            "dico_id": "yb_fr_3031",
-            "user_id": "b42e96a8-7b0b-8b45-ae69-7c2efd472e1d",
-            "user_name": "Bergier",
-            "article_id": "d865db16-93fc-4025-936c-ef4f7a01e454",
-            "contrib_type": "sound",
-            "contrib_data": "mba-d865db16-93fc-4025-936c-ef4f7a01e454_1-2019-09-05T075035.034Z-.wav",
-            "contrib_path": "https://ntealan.net/soundcontrib/",
-            "contrib_name": "mba\u2019",
-            "ntealan": true,
-            "validate": false,
-            "last_update": "2019-09-05 07:52:09.542000"
-         },
-         {
-            "public_id": "e3ff81a2-3c04-47a1-97e7-10bcd30eb8d4",
-            "dico_id": "yb_fr_3031",
-            "user_id": "b42e96a8-7b0b-8b45-ae69-7c2efd472e1d",
-            "user_name": "Bergier",
-            "article_id": "6777b70e-02d1-497f-ab63-433f2205978f",
-            "contrib_type": "sound",
-            "contrib_data": "amm-_sound_2-2019-09-23T105907.502Z-.wav",
-            "contrib_path": "https://ntealan.net/soundcontrib/",
-            "contrib_name": "amm\u025b",
-            "ntealan": true,
-            "validate": false,
-            "last_update": "2019-09-23 10:59:43.063000"
-         },
-         {
-            "public_id": "ab317597-7c66-4af6-9037-ffa862c9178a",
-            "dico_id": "yb_fr_3031",
-            "user_id": "b42e96a8-7b0b-8b45-ae69-7c2efd472e1d",
-            "user_name": "Bergier",
-            "article_id": "6777b70e-02d1-497f-ab63-433f2205978f",
-            "contrib_type": "sound",
-            "contrib_data": "amm-_sound_2-2019-09-23T105941.149Z-.wav",
-            "contrib_path": "https://ntealan.net/soundcontrib/",
-            "contrib_name": "amm\u025b",
-            "ntealan": true,
-            "validate": false,
-            "last_update": "2019-09-23 10:59:43.135000"
-         },
-         {
             "public_id": "d76514c3-d605-4f01-8284-a17031f9bf9f",
             "dico_id": "yb_fr_3031",
             "user_id": "b42e96a8-7b0b-8b45-ae69-7c2efd472e1d",
