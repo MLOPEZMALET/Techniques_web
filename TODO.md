@@ -15,7 +15,7 @@ SÉCURITÉ
         fichier et non vous avec —acces-log"
 - Rendre la BD dynamique: création et suppression d'utilisateurs, modification de mots de passe
   -->attention: il faudra implémenter ces fonctionnalités en front-end aussi
-- Sécurité par tokens: JWT ou uuid (python)
+- Sécurité par tokens: JWT ou uuid (python): done
 - identification en sessions: done
 - Certificats HTTPS avec Certbot: essayer de l'implémenter et voir
 - Demander aux autres groupes s'ils ont réussi à être en https et s'ils ont "le cadenas"
