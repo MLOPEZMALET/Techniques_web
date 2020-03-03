@@ -25,4 +25,4 @@ REQUÊTES
 - Modifier les URL: done
 - faire une requête par matching (?)
 - modifier la création de contribution: il ne faut pas préciser d'ID
-- juste besoin de l'ID pour supprimer une contribution
+- juste besoin de l'ID pour supprimer une contribution: done
