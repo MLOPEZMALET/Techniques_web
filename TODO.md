@@ -6,9 +6,9 @@ DEVELOPPEMENT
 - générer requirements.txt: done
 
 DOCUMENTATION
-- mieux préciser comment on répond au besoin du client
+- mieux préciser comment on répond au besoin du client: done
 - modifier les requêtes/ liens
-- créer la documentation technique (fichier .sh devient .txt)
+- créer la documentation technique (fichier .sh devient .txt): done
 
 SÉCURITÉ
 - log: "la création des logs va poser un problème: log/gunicorn.log , ici c'est nginx qui crée ce
