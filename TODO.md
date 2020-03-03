@@ -4,8 +4,8 @@ FRONT-END
 - deux url différentes
 - deux serveurs nginx différents
 - session qui se ferme automatiquement
-- appli dynamique et responsive
-- toutes requêtes doivent être disponibles sur front-end: formulaires?
+- appli dynamique et responsive: jinja2
+- toutes requêtes doivent être disponibles sur front-end: formulaires
 
 DEVELOPPEMENT
 - faire des unitest
