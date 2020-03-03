@@ -96,14 +96,14 @@ def login():
 def login_post():
     username = request.form.get('username')
     password = request.form.get('password')
-    
+
     user = User.query.filter_by(username=username).first()
-    
+
     # Rafraichit la page si l'utilisateur n'existe pas ou si le mot de passe ne correspond pas
-    if not user or not verify_password(username, password): 
+    if not user or not verify_password(username, password):
         flash('Please check your login details and try again.')
-        return redirect(url_for('login')) 
-    
+        return redirect(url_for('login'))
+
     # Si l'identifiant et le mot de passe entrés sont correct
     session['logged_in'] = True
     session['username'] = username
@@ -121,7 +121,7 @@ def signup_post():
     # Ajout d'un utilisateur dans la base de données
     username = request.form.get('username')
     password = request.form.get('password')
-    
+
     if username == "" or password == "":
         # Si un champ est vide
         flash('Password or username missing')
@@ -130,12 +130,12 @@ def signup_post():
         # Si l'utilisateur existe déjà dans la base de données
         flash('Username already exists')
         return redirect(url_for('signup'))
-    
+
     user = User(username=username)
     user.hash_password(password)
     db.session.add(user)
     db.session.commit()
-    
+
     return redirect(url_for('login'))
 
 @app.route('/logout')
@@ -284,7 +284,7 @@ def json_delete():
     if request.is_json:
         req = request.get_json()
         if sorted(req.keys()) == sorted(js.required_delete_keys):
-            data_number = req["data_number"]
+            data_number = req["public_id"]
             js.delete_data(data_number, js.path_all)
             response_body = {
                 "message": "Data successfully deleted!",

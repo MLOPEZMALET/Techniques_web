@@ -36,17 +36,20 @@ def update_data(category, new_data, path, data_number=None):
 def delete_data(data_number, path):
     with open(path, "r") as read_file:
         data = json.load(read_file)
-        del data["contributions"]["data"][data_number]
+        for i in range(len(data["contributions"]["data"])):
+            if data["contributions"]["data"][i]["public_id"] == data_number:
+                data["contributions"]["data"].pop(i)
+                break
     with open(path, "w") as jsonFile:
         json.dump(data, jsonFile, indent=3)
 
 
 # Chemin relatif vers la BD JSON
-path_all = "../Data/DONNEES_CLIENT.json"
+path_all = "../data/DONNEES_CLIENT.json"
 # Liste des clés nécessaires au bon formatage des données JSON
 required_write_keys = ['public_id', 'dico_id', 'user_id', 'user_name', 'article_id', 'contrib_type', 'contrib_data', 'contrib_path', 'contrib_name', 'ntealan', 'validate', 'last_update']
 required_update_keys = ["field", "data_number", "new_data"]
-required_delete_keys = ["data_number"]
+required_delete_keys = ["public_id"]
 
 # ________________________________________TESTING________________________________
 
@@ -71,4 +74,4 @@ required_delete_keys = ["data_number"]
 
 #__TEST_DELETING____
 
-#delete_data(path_all, 1)
+delete_data("8ad93a62-9437-416f-93c6-948a2c15b45b", path_all)
