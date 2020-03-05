@@ -11,6 +11,11 @@ FRONT-END
 - toutes requêtes doivent être disponibles sur front-end: formulaires Maëva
 - log: "la création des logs va poser un problème: log/gunicorn.log , ici c'est nginx qui crée ce
         fichier et non vous avec —acces-log": afala
+- modifier doc
+- fichier bash qui lance tout
+- doc technique pour l'installation (revoir doc txt)
+- faire une requête par matching (?): retrouver information meme si pas exact.
+- modifier la création de contribution: il ne faut pas préciser d'ID
 
 DEVELOPPEMENT
 - faire des unitest ( backend ++): lili
@@ -19,8 +24,6 @@ DEVELOPPEMENT
 
 DOCUMENTATION
 - mieux préciser comment on répond au besoin du client: done
-- modifier les requêtes/ liens
-- créer la documentation technique (fichier .sh devient .txt): done
 
 SÉCURITÉ
 
@@ -28,11 +31,8 @@ SÉCURITÉ
   -->attention: il faudra implémenter ces fonctionnalités en front-end aussi
 - Sécurité par tokens: JWT ou uuid (python): done
 - identification en sessions: done
-- Certificats HTTPS avec Certbot: essayer de l'implémenter et voir
 
 REQUÊTES
 - Formater les réponses: done
 - Modifier les URL: done
-- faire une requête par matching (?): retrouver information meme si pas exact.
-- modifier la création de contribution: il ne faut pas préciser d'ID
 - juste besoin de l'ID pour supprimer une contribution: done
