@@ -17,6 +17,7 @@ FRONT-END
 - faire une requête par matching (?): retrouver information meme si pas exact.
 - modifier la création de contribution: il ne faut pas préciser d'ID
 - installer brew et essayer pour le certificat: melanie
+- nginx, mettre api_cepty.conf dans sites-available, lien symbolique vers enabled. (regarder commandes.sh)
 
 DEVELOPPEMENT
 - faire des unitest ( backend ++): lili
