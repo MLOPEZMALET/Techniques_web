@@ -74,4 +74,4 @@ required_delete_keys = ["public_id"]
 
 #__TEST_DELETING____
 
-delete_data("8ad93a62-9437-416f-93c6-948a2c15b45b", path_all)
+# delete_data("8ad93a62-9437-416f-93c6-948a2c15b45b", path_all)

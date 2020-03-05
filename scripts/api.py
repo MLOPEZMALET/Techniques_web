@@ -76,7 +76,7 @@ def verify_password(username_or_token, password):
 def index():
     return render_template('index.html', logged=session.get('logged_in'))
 
-# Page de profile
+# Page de profil
 @app.route('/profile')
 # @auth.login_required # l'accès n'est autorisé que pour les utilisateurs authentifiés
 def profile():
