@@ -16,6 +16,7 @@ FRONT-END
 - doc technique pour l'installation (revoir doc txt)
 - faire une requête par matching (?): retrouver information meme si pas exact.
 - modifier la création de contribution: il ne faut pas préciser d'ID
+- installer brew et essayer pour le certificat: melanie
 
 DEVELOPPEMENT
 - faire des unitest ( backend ++): lili
