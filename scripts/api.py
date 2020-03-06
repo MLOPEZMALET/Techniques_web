@@ -86,7 +86,7 @@ def index():
 
 # Page de profil
 @app.route('/profile')
-# @auth.login_required # l'accès n'est autorisé que pour les utilisateurs authentifiées
+# @auth.login_required # l'accès n'est autorisé que pour les utilisateurs authentifiés
 def profile():
     if not session.get('logged_in'):
         return redirect(url_for('login'))
@@ -112,7 +112,7 @@ def login_post():
         flash('Please check your login details and try again.')
         return redirect(url_for('login')) 
     
-    # Si l'identifiant et le mot de passe entrés sont corrects
+    # Si l'identifiant et le mot de passe entrés sont correct
     session['logged_in'] = True
     session['username'] = username
     return redirect(url_for('profile'))
@@ -292,7 +292,7 @@ def json_delete():
     if request.is_json:
         req = request.get_json()
         if sorted(req.keys()) == sorted(js.required_delete_keys):
-            data_number = req["data_number"]
+            data_number = req["public_id"]
             js.delete_data(data_number, js.path_all)
             response_body = {
                 "message": "Data successfully deleted!",
