@@ -1,5 +1,6 @@
 import os
 import datetime
+from datetime import timedelta
 
 from flask import Flask, abort, request, jsonify, g, url_for, Response
 from flask import make_response, flash, redirect, render_template, session
@@ -17,6 +18,7 @@ import wrangling_json_data as js
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.urandom(12)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///db.sqlite'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False # pour ne pas afficher les messages d'avertissements de SQLAlchemy sur la sortie standard
 app.config['SQLALCHEMY_COMMIT_ON_TEARDOWN'] = True
 
 # Extensions
@@ -68,9 +70,15 @@ def verify_password(username_or_token, password):
             return False
     g.user = user
     return True
-
+    
 """ Partie pour le Front-End """
-
+@app.before_request
+def before_request():
+    # Déconnexion automatique après 5 minutes d'inactivité
+    session.permanent = True # pour forcer l'expiration au bout d'un certain temps
+    app.permanent_session_lifetime = datetime.timedelta(minutes=5)
+    session.modified = True # réinitialise le temps
+    
 # Page d'accueil
 @app.route('/')
 def index():
@@ -78,7 +86,7 @@ def index():
 
 # Page de profil
 @app.route('/profile')
-# @auth.login_required # l'accès n'est autorisé que pour les utilisateurs authentifiés
+# @auth.login_required # l'accès n'est autorisé que pour les utilisateurs authentifiées
 def profile():
     if not session.get('logged_in'):
         return redirect(url_for('login'))
@@ -96,19 +104,19 @@ def login():
 def login_post():
     username = request.form.get('username')
     password = request.form.get('password')
-
+    
     user = User.query.filter_by(username=username).first()
-
+    
     # Rafraichit la page si l'utilisateur n'existe pas ou si le mot de passe ne correspond pas
-    if not user or not verify_password(username, password):
+    if not user or not verify_password(username, password): 
         flash('Please check your login details and try again.')
-        return redirect(url_for('login'))
-
-    # Si l'identifiant et le mot de passe entrés sont correct
+        return redirect(url_for('login')) 
+    
+    # Si l'identifiant et le mot de passe entrés sont corrects
     session['logged_in'] = True
     session['username'] = username
     return redirect(url_for('profile'))
-
+    
 # Page d'inscription qui apparait aux personnes non connectées
 @app.route('/signup')
 def signup():
@@ -121,7 +129,7 @@ def signup_post():
     # Ajout d'un utilisateur dans la base de données
     username = request.form.get('username')
     password = request.form.get('password')
-
+    
     if username == "" or password == "":
         # Si un champ est vide
         flash('Password or username missing')
@@ -130,12 +138,12 @@ def signup_post():
         # Si l'utilisateur existe déjà dans la base de données
         flash('Username already exists')
         return redirect(url_for('signup'))
-
+    
     user = User(username=username)
     user.hash_password(password)
     db.session.add(user)
     db.session.commit()
-
+    
     return redirect(url_for('login'))
 
 @app.route('/logout')
@@ -284,7 +292,7 @@ def json_delete():
     if request.is_json:
         req = request.get_json()
         if sorted(req.keys()) == sorted(js.required_delete_keys):
-            data_number = req["public_id"]
+            data_number = req["data_number"]
             js.delete_data(data_number, js.path_all)
             response_body = {
                 "message": "Data successfully deleted!",
