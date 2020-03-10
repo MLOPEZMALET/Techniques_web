@@ -90,6 +90,7 @@ def logout():
     return redirect(url_for('index'))
 
 
+# GET
 @app.route('/contributions', methods=["GET"])
 # @auth.login_required
 def contrib():
@@ -114,6 +115,65 @@ def get():
         print(r.json)
         print(r.text)
     return "<p>"+str(r.json)+"<p>"
+
+    """ autres requetes
+
+# POST
+@app.route('/add_contrib')
+def post():
+    if session.get('logged_in'):
+        return render_template("ajout.html", logged=session.get('logged_in'))
+
+@app.route('/add_contrib', methods=["POST"])
+def post_contrib():
+    #changer avec formulaire
+    username = request.form.get('username')
+    password = request.form.get('password')
+    r = requests.post('http://ceptyconsultant.local:8000/api/resource/add_contrib', data=)
+    if r.status_code == 200:
+        print(r)
+        print(r.json)
+        print(r.text)
+    return "<p>"+str(r.json)+"<p>"
+
+# PUT
+
+@app.route('/update_contrib')
+def put():
+    if session.get('logged_in'):
+        return render_template("modif.html", logged=session.get('logged_in'))
+
+@app.route('/update_contrib', methods=["PUT"])
+def put_contrib():
+    #changer avec formulaire
+    username = request.form.get('username')
+    password = request.form.get('password')
+    r = requests.put('http://ceptyconsultant.local:8000/api/resource/update_contrib', data=)
+    if r.status_code == 200:
+        print(r)
+        print(r.json)
+        print(r.text)
+    return "<p>"+str(r.json)+"<p>"
+
+# DELETE
+@app.route('/delete_contrib')
+def delete():
+    if session.get('logged_in'):
+        return render_template("delete.html", logged=session.get('logged_in'))
+
+@app.route('/delete_contrib', methods=["DELETE"])
+def delete_contrib():
+    #changer
+    username = request.form.get('username')
+    password = request.form.get('password')
+    r = requests.delete('http://ceptyconsultant.local:8000/api/resource/delete_contrib', data=)
+    if r.status_code == 200:
+        print(r)
+        print(r.json)
+        print(r.text)
+    return "<p>"+str(r.json)+"<p>"
+
+
 
 
 if __name__ == "__main__":
