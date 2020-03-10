@@ -44,24 +44,6 @@
         </div>
 
         <div class="hero-body">
-			{% if logged %}
-			<nav id="main-menu" role="navigation" class="navbar">
-					<div id="navbar" class="collapse">
-						<ul>
-							<li ><a href="{{ url_for('add_contrib') }}" class="navbar-item">
-									Ajout de contribution
-								</a></li>
-							<li><a href="{{ url_for('modif_contrib') }}" class="navbar-item">
-									Modification de contribution
-								</a></li>
-							<li><a href="{{ url_for('delete_contrib') }}" class="navbar-item">
-									Suppression de contribution
-								</a></li>
-							<li><a href="{{ url_for('contrib') }}" class="navbar-item">Contributions</a></li>
-						</ul>
-					</div>
-				</nav>
-			{% endif %}
             <div class="container has-text-centered">
                {% block content %}
                {% endblock %}

@@ -1,6 +1,7 @@
 import os
 import datetime
 from datetime import timedelta
+from http import HTTPStatus
 
 from flask import Flask, abort, request, jsonify, g, url_for, Response
 from flask import make_response, flash, redirect, render_template, session
@@ -70,7 +71,7 @@ def verify_password(username_or_token, password):
             return False
     g.user = user
     return True
-    
+
 """ Partie pour le Front-End """
 @app.before_request
 def before_request():
@@ -78,7 +79,7 @@ def before_request():
     session.permanent = True # pour forcer l'expiration au bout d'un certain temps
     app.permanent_session_lifetime = datetime.timedelta(minutes=5)
     session.modified = True # réinitialise le temps
-    
+
 # Page d'accueil
 @app.route('/')
 def index():
@@ -104,19 +105,19 @@ def login():
 def login_post():
     username = request.form.get('username')
     password = request.form.get('password')
-    
+
     user = User.query.filter_by(username=username).first()
-    
+
     # Rafraichit la page si l'utilisateur n'existe pas ou si le mot de passe ne correspond pas
-    if not user or not verify_password(username, password): 
+    if not user or not verify_password(username, password):
         flash('Please check your login details and try again.')
-        return redirect(url_for('login')) 
-    
+        return redirect(url_for('login'))
+
     # Si l'identifiant et le mot de passe entrés sont correct
     session['logged_in'] = True
     session['username'] = username
     return redirect(url_for('profile'))
-    
+
 # Page d'inscription qui apparait aux personnes non connectées
 @app.route('/signup')
 def signup():
@@ -124,27 +125,24 @@ def signup():
         return redirect(url_for('profile'))
     return render_template('signup.html', logged=session.get('logged_in'))
 
+
 @app.route('/signup', methods=['POST'])
 def signup_post():
     # Ajout d'un utilisateur dans la base de données
-    username = request.form.get('username')
-    password = request.form.get('password')
-    
-    if username == "" or password == "":
+    #username = request.form.get('username')
+    #password = request.form.get('password')
+    req = request.get_json()
+    if user_data["username"] == "" or user_data["password"] == "":
         # Si un champ est vide
-        flash('Password or username missing')
-        return redirect(url_for('signup'))
+        return make_response("No content", 226)
     if User.query.filter_by(username=username).first() is not None:
         # Si l'utilisateur existe déjà dans la base de données
-        flash('Username already exists')
-        return redirect(url_for('signup'))
-    
+        return HTTPStatus.IM_USED
     user = User(username=username)
     user.hash_password(password)
     db.session.add(user)
     db.session.commit()
-    
-    return redirect(url_for('login'))
+    return make_response("ok", 201)
 
 @app.route('/logout')
 # @auth.login_required
@@ -232,7 +230,7 @@ def json_post():
 @auth.login_required
 def json_read():
     data = js.read_data(js.path_all)
-    return make_response(jsonify(data))
+    return make_response(jsonify(data),200)
 
 # GET: l'ajout du nombre x dans l'url permet d'accéder à la contribution numéro x
 @app.route("/api/resource/get/<int:num>", methods=["GET"])
@@ -240,7 +238,7 @@ def json_read():
 def json_read_num(num):
     data = js.read_data(js.path_all)
     data = data[num]
-    return make_response(jsonify(data))
+    return make_response(jsonify(data),200)
 
 # GET: l'ajout du champ y dans l'url permet d'accéder à ce champ dans toutes les contributions
 @app.route("/api/resource/get/<string:field>", methods=["GET"])
@@ -250,7 +248,7 @@ def json_read_field(field):
     fields = []
     for i in data:
         fields.append(i[field])
-    return make_response(jsonify(fields))
+    return make_response(jsonify(fields),200)
 
 # GET: l'ajout du nombre x + champ y dans l'url permet d'accéder au champ y de la contribution x
 @app.route("/api/resource/get/<int:num>/<string:field>", methods=["GET"])
@@ -258,7 +256,7 @@ def json_read_field(field):
 def json_read_num_field(num, field):
     data = js.read_data(js.path_all)
     data = data[num][field]
-    return make_response(jsonify(data))
+    return make_response(jsonify(data),200)
 
 # PUT: Modifie la valeur d'un champ dans une contribution donnée. Si aucun numéro de contribution n'est indiqué, le champ sera modifié dans toutes les contributions
 @app.route("/api/resource/update_contrib", methods=["PUT"])
