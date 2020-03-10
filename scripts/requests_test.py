@@ -1,7 +1,8 @@
 import requests
 import os
 from flask import Flask, abort, request, jsonify, g, url_for, Response
-from flask import make_response, flash, redirect, render_template, session
+from flask import flash, redirect, render_template, session
+import datetime
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.urandom(12)
@@ -57,7 +58,6 @@ def signup_post():
     # Ajout d'un utilisateur dans la base de données
     username = request.form.get('username')
     password = request.form.get('password')
-
     if username == "" or password == "":
         # Si un champ est vide
         flash('Password or username missing')
@@ -65,11 +65,14 @@ def signup_post():
     else:
         user = {"username": username, "password": password}
         r_signup = requests.post("http://ceptyconsultant.local:8000/signup", data=user)
+        print(r_signup.text, r_signup.status_code, r_signup.json)
         if r_signup.status_code == 201:
             return redirect(url_for('login'))
         elif r_signup.status_code == 226:
             flash('Username already exists')
             return redirect(url_for('signup'))
+        else:
+            return "Let's debug!"
 
 
 @app.route('/logout')
@@ -130,22 +133,22 @@ def post_contrib():
     contrib_path = request.form.get('contrib_path')
     contrib_name = request.form.get('contrib_name')
     public_id = request.form.get('public_id')
-    ntealan = True
+    ntealan = request.form.get('ntealan')
     # quand modifié ntealan = request.form.get('ntealan')
 
     contrib = {
                 "article_id": article_id,
-                "contrib_data": "amm-2395b25e-2164-4c7d-a685-54a6c6e91f0d_1-2019-09-23T110018.479Z-.wav",
-                "contrib_name": "ammɛ",
-                "contrib_path": "https://ntealan.net/soundcontrib/",
-                "contrib_type": "sound",
-                "dico_id": "yb_fr_3031",
-                "last_update": "2019-09-23 11:00:52.802000",
-                "ntealan": true,
-                "public_id": "d76514c3-d605-4f01-8284-a17031f9bf9f",
-                "user_id": "b42e96a8-7b0b-8b45-ae69-7c2efd472e1d",
-                "user_name": "Bergier",
-                "validate": false
+                "contrib_data": contrib_data,
+                "contrib_name": contrib_name,
+                "contrib_path": contrib_path,
+                "contrib_type": contrib_type,
+                "dico_id": dico_id,
+                "last_update": last_update,
+                "ntealan": ntealan,
+                "public_id": public_id,
+                "user_id": user_id,
+                "user_name": user_name,
+                "validate": validate
                 }
     r = requests.post('http://ceptyconsultant.local:8000/api/resource/add_contrib', data=contrib)
     if r.status_code == 200:
@@ -196,4 +199,4 @@ def delete_contrib():
 
 
 if __name__ == "__main__":
-    app.run()
+    app.run(debug=True)
