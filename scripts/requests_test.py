@@ -1,11 +1,3 @@
-""" etat des lieux:
-- il faut enlever les templates de api.py au fur et à mesure
-- utiliser requests.get_json() pour réussir à récuperer les données de l'utilisateur à partir du front-end (comme avec postman! reprendre code initial)
-- vérifier que la communication front-back se fait bien: récupérer codes, récuperer infos
-- il faut intégrer les nouveaux templates aux différents URL de l'application
-- gérer les contrib (pb avec les parametres jinja)
-"""
-
 import requests
 import os
 from flask import Flask, abort, request, jsonify, g, url_for, Response
@@ -116,7 +108,6 @@ def get():
         print(r.text)
     return "<p>"+str(r.json)+"<p>"
 
-    """ autres requetes
 
 # POST
 @app.route('/add_contrib')
@@ -124,12 +115,38 @@ def post():
     if session.get('logged_in'):
         return render_template("ajout.html", logged=session.get('logged_in'))
 
+
 @app.route('/add_contrib', methods=["POST"])
 def post_contrib():
-    #changer avec formulaire
-    username = request.form.get('username')
-    password = request.form.get('password')
-    r = requests.post('http://ceptyconsultant.local:8000/api/resource/add_contrib', data=)
+    user_id = request.form.get('user_id')
+    article_id = request.form.get('article_id')
+    user_name = session["username"]
+    last_update = datetime.datetime.now()
+    validate = request.form.get('validate')
+    contrib_type = request.form.get('contrib_type')
+    dico_id = request.form.get('dico_id')
+    contrib_data = request.form.get('contrib_data')
+    contrib_path = request.form.get('contrib_path')
+    contrib_name = request.form.get('contrib_name')
+    public_id = request.form.get('public_id')
+    ntealan = True
+    # quand modifié ntealan = request.form.get('ntealan')
+
+    contrib = {
+                "article_id": article_id,
+                "contrib_data": "amm-2395b25e-2164-4c7d-a685-54a6c6e91f0d_1-2019-09-23T110018.479Z-.wav",
+                "contrib_name": "ammɛ",
+                "contrib_path": "https://ntealan.net/soundcontrib/",
+                "contrib_type": "sound",
+                "dico_id": "yb_fr_3031",
+                "last_update": "2019-09-23 11:00:52.802000",
+                "ntealan": true,
+                "public_id": "d76514c3-d605-4f01-8284-a17031f9bf9f",
+                "user_id": "b42e96a8-7b0b-8b45-ae69-7c2efd472e1d",
+                "user_name": "Bergier",
+                "validate": false
+                }
+    r = requests.post('http://ceptyconsultant.local:8000/api/resource/add_contrib', data=contrib)
     if r.status_code == 200:
         print(r)
         print(r.json)
@@ -146,9 +163,11 @@ def put():
 @app.route('/update_contrib', methods=["PUT"])
 def put_contrib():
     #changer avec formulaire
-    username = request.form.get('username')
-    password = request.form.get('password')
-    r = requests.put('http://ceptyconsultant.local:8000/api/resource/update_contrib', data=)
+    field = request.form.get('change_input')
+    number = request.form.get('change_id')
+    new_data = request.form.get('change_modif')
+    contrib = {"field": field, "data_number": number, "new_data": new_data}
+    r = requests.put('http://ceptyconsultant.local:8000/api/resource/update_contrib', data=contrib)
     if r.status_code == 200:
         print(r)
         print(r.json)
@@ -163,10 +182,9 @@ def delete():
 
 @app.route('/delete_contrib', methods=["DELETE"])
 def delete_contrib():
-    #changer
-    username = request.form.get('username')
-    password = request.form.get('password')
-    r = requests.delete('http://ceptyconsultant.local:8000/api/resource/delete_contrib', data=)
+    public_id = request.form.get('contrib_name')
+    contrib = {"public_id": public_id}
+    r = requests.delete('http://ceptyconsultant.local:8000/api/resource/delete_contrib', data=contrib)
     if r.status_code == 200:
         print(r)
         print(r.json)

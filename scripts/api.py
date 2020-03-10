@@ -72,7 +72,7 @@ def verify_password(username_or_token, password):
     g.user = user
     return True
 
-""" Partie pour le Front-End """
+
 @app.before_request
 def before_request():
     # Déconnexion automatique après 5 minutes d'inactivité
@@ -80,26 +80,7 @@ def before_request():
     app.permanent_session_lifetime = datetime.timedelta(minutes=5)
     session.modified = True # réinitialise le temps
 
-# Page d'accueil
-@app.route('/')
-def index():
-    return render_template('index.html', logged=session.get('logged_in'))
 
-# Page de profil
-@app.route('/profile')
-# @auth.login_required # l'accès n'est autorisé que pour les utilisateurs authentifiés
-def profile():
-    if not session.get('logged_in'):
-        return redirect(url_for('login'))
-    else:
-        return render_template('profile.html', name=session.get('username'), logged=session.get('logged_in'))
-
-# Page d'authentification qui apparait aux personnes non connectées
-@app.route('/login')
-def login():
-    if session.get('logged_in'):
-        return redirect(url_for('profile'))
-    return render_template('login.html', logged=session.get('logged_in'))
 
 @app.route('/login', methods=['POST'])
 def login_post():
@@ -110,40 +91,33 @@ def login_post():
 
     # Rafraichit la page si l'utilisateur n'existe pas ou si le mot de passe ne correspond pas
     if not user or not verify_password(username, password):
-        flash('Please check your login details and try again.')
-        return redirect(url_for('login'))
+        return make_response("authentication error", 401)
 
     # Si l'identifiant et le mot de passe entrés sont correct
     session['logged_in'] = True
     session['username'] = username
-    return redirect(url_for('profile'))
-
-# Page d'inscription qui apparait aux personnes non connectées
-@app.route('/signup')
-def signup():
-    if session.get('logged_in'):
-        return redirect(url_for('profile'))
-    return render_template('signup.html', logged=session.get('logged_in'))
+    return make_response("succesful authentication", 200)
 
 
 @app.route('/signup', methods=['POST'])
 def signup_post():
     # Ajout d'un utilisateur dans la base de données
-    #username = request.form.get('username')
-    #password = request.form.get('password')
+    username = request.form.get('username')
+    password = request.form.get('password')
     req = request.get_json()
     if user_data["username"] == "" or user_data["password"] == "":
         # Si un champ est vide
-        return make_response("No content", 226)
+        return make_response("No content", 204)
     if User.query.filter_by(username=username).first() is not None:
         # Si l'utilisateur existe déjà dans la base de données
-        return HTTPStatus.IM_USED
+        return make_response("conflict: user already used", 409)
     user = User(username=username)
     user.hash_password(password)
     db.session.add(user)
     db.session.commit()
     return make_response("ok", 201)
 
+"""POSE PB: unit trop étroitement front et back end
 @app.route('/logout')
 # @auth.login_required
 def logout():
@@ -154,14 +128,17 @@ def logout():
     session['logged_in'] = False
     return redirect(url_for('index'))
 
+"""
+
+
 # Page des contributions
 @app.route('/contributions', methods=["GET"])
 # @auth.login_required
 def contrib():
     if not session.get('logged_in'):
-        return redirect(url_for('login'))
+        return make_response("you must log in ", 401)
     data = js.read_data(js.path_all)
-    return render_template("contrib.html", logged=session.get('logged_in'), params=data)
+    return make_response("ok", 200)
 
 """ Partie pour l'API """
 
@@ -190,14 +167,14 @@ def get_user(id):
     return jsonify({'username': user.username})
 
 @app.route('/api/token')
-@auth.login_required
+#@auth.login_required
 def get_auth_token():
     # Renvoie le token d'authentification qui doit être mis dans le champ "Username" avec le type "Basic Auth" sur Postman
     token = g.user.generate_auth_token(600)
     return jsonify({'token': token.decode('ascii'), 'duration': 600})
 
 @app.route('/api/resource')
-@auth.login_required
+#@auth.login_required
 def get_resource():
     # Renvoie un message de salutation à l'utilisateur
     return jsonify({'data': 'Hello, %s!' % g.user.username})
@@ -205,7 +182,7 @@ def get_resource():
 
 # POST: Permet d'ajouter une contribution à la BD
 @app.route("/api/resource/add_contrib", methods=["POST"])
-@auth.login_required
+#@auth.login_required
 def json_post():
     # vérification du format de la requête (JSON + clés requises)
     if request.is_json:
@@ -227,14 +204,14 @@ def json_post():
 
 # GET: Permet de parser le fichier JSON pour consulter des données (ici, toutes)
 @app.route("/api/resource/get", methods=["GET"])
-@auth.login_required
+#@auth.login_required
 def json_read():
     data = js.read_data(js.path_all)
     return make_response(jsonify(data),200)
 
 # GET: l'ajout du nombre x dans l'url permet d'accéder à la contribution numéro x
 @app.route("/api/resource/get/<int:num>", methods=["GET"])
-@auth.login_required
+#@auth.login_required
 def json_read_num(num):
     data = js.read_data(js.path_all)
     data = data[num]
@@ -242,7 +219,7 @@ def json_read_num(num):
 
 # GET: l'ajout du champ y dans l'url permet d'accéder à ce champ dans toutes les contributions
 @app.route("/api/resource/get/<string:field>", methods=["GET"])
-@auth.login_required
+#@auth.login_required
 def json_read_field(field):
     data = js.read_data(js.path_all)
     fields = []
@@ -252,7 +229,7 @@ def json_read_field(field):
 
 # GET: l'ajout du nombre x + champ y dans l'url permet d'accéder au champ y de la contribution x
 @app.route("/api/resource/get/<int:num>/<string:field>", methods=["GET"])
-@auth.login_required
+#@auth.login_required
 def json_read_num_field(num, field):
     data = js.read_data(js.path_all)
     data = data[num][field]
@@ -260,7 +237,7 @@ def json_read_num_field(num, field):
 
 # PUT: Modifie la valeur d'un champ dans une contribution donnée. Si aucun numéro de contribution n'est indiqué, le champ sera modifié dans toutes les contributions
 @app.route("/api/resource/update_contrib", methods=["PUT"])
-@auth.login_required
+#@auth.login_required
 def json_updated():
     if request.is_json:
         req = request.get_json()
@@ -285,7 +262,7 @@ def json_updated():
 
 # DELETE: efface la contribution numéro x (x donné dans la requête)
 @app.route("/api/resource/delete_contrib", methods=["DELETE"])
-@auth.login_required
+#@auth.login_required
 def json_delete():
     if request.is_json:
         req = request.get_json()
