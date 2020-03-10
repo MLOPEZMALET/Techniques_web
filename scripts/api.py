@@ -81,7 +81,6 @@ def before_request():
     session.modified = True # réinitialise le temps
 
 
-
 @app.route('/login', methods=['POST'])
 def login_post():
     username = request.form.get('username')
@@ -280,6 +279,7 @@ def json_delete():
             return make_response(jsonify({"message": "Wrong data structure, check these fields exist in your request: "+ str(js.required_delete_keys)}), 400)
     else:
         return make_response(jsonify({"message": "Request body must be JSON"}), 400)
+
 
 if __name__ == '__main__':
     # Création de la base de données des utilisateurs si elle n'existe pas

@@ -25,6 +25,7 @@ def login_post():
     password = request.form.get('password')
     user = {"username": username, "password": password}
     r_login = requests.post("http://ceptyconsultant.local:8000/login", data=user)
+    print(r_login.text, r_login.status_code, r_login.json)
     if r_login.status_code == 200:
         # Si l'identifiant et le mot de passe entrés sont correct
         session['logged_in'] = True
