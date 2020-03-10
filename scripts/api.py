@@ -104,7 +104,7 @@ def signup_post():
     username = request.form.get('username')
     password = request.form.get('password')
     req = request.get_json()
-    if user_data["username"] == "" or user_data["password"] == "":
+    if username == "" or password == "":
         # Si un champ est vide
         return make_response("No content", 204)
     if User.query.filter_by(username=username).first() is not None:
