@@ -80,6 +80,9 @@ def before_request():
     app.permanent_session_lifetime = datetime.timedelta(minutes=5)
     session.modified = True # réinitialise le temps
 
+@app.route('/')
+def index():
+    return "hello. Je marche et ça c'est une bonne nouvelle!"
 
 @app.route('/login', methods=['POST'])
 def login_post():
