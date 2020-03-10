@@ -18,14 +18,14 @@
 
                     <div id="navbarMenuHeroA" class="navbar-menu">
                         <div class="navbar-end">
-                            <a href="{{ url_for('index') }}" class="navbar-item">
+                            <a href="{{ url_for('idx') }}" class="navbar-item">
                                 Home
                             </a>
                             <a href="{{ url_for('profile') }}" class="navbar-item">
                                 Profile
                             </a>
 							{% if not logged %}
-								<a href="{{ url_for('login') }}" class="navbar-item">
+								<a href="{{ url_for('lgn') }}" class="navbar-item">
 									Login
 								</a>
 								<a href="{{ url_for('signup') }}" class="navbar-item">
@@ -48,7 +48,7 @@
 			<nav id="main-menu" role="navigation" class="navbar">
 					<div id="navbar" class="collapse">
 						<ul>
-							<li ><a href="{{ url_for('add_contrib') }}" class="navbar-item">
+							<li ><a href="{{ url_for('post') }}" class="navbar-item">
 									Ajout de contribution
 								</a></li>
 							<li><a href="{{ url_for('put') }}" class="navbar-item">

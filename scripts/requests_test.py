@@ -8,12 +8,12 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = os.urandom(12)
 
 
-@app.route('/')
+@app.route('/', endpoint="idx")
 def index():
     return render_template('index.html', logged=session.get('logged_in'))
 
 # Page d'authentification qui apparait aux personnes non connectées
-@app.route('/login')
+@app.route('/login', endpoint="lgn")
 def login():
     if session.get('logged_in'):
         return redirect(url_for('profile'))
@@ -38,7 +38,7 @@ def login_post():
         return redirect(url_for('login'))
 
 
-@app.route('/profile')
+@app.route('/profile', endpoint="profile")
 def profile():
     if not session.get('logged_in'):
         return redirect(url_for('login'))
@@ -87,7 +87,7 @@ def logout():
 
 
 # GET
-@app.route('/contributions', methods=["GET"])
+@app.route('/contributions', endpoint="contrib", methods=["GET"])
 # @auth.login_required
 def contrib():
     if not session.get('logged_in'):
@@ -114,7 +114,7 @@ def get():
 
 
 # POST
-@app.route('/add_contrib')
+@app.route('/add_contrib', endpoint="post")
 def post():
     if session.get('logged_in'):
         return render_template("ajout.html", logged=session.get('logged_in'))
@@ -159,7 +159,7 @@ def post_contrib():
 
 # PUT
 
-@app.route('/update_contrib')
+@app.route('/update_contrib', endpoint="put")
 def put():
     if session.get('logged_in'):
         return render_template("modif.html", logged=session.get('logged_in'))
@@ -179,7 +179,7 @@ def put_contrib():
     return "<p>"+str(r.json)+"<p>"
 
 # DELETE
-@app.route('/delete_contrib')
+@app.route('/delete_contrib', endpoint="delete")
 def delete():
     if session.get('logged_in'):
         return render_template("delete.html", logged=session.get('logged_in'))
