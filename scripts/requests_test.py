@@ -115,7 +115,6 @@ def get():
     r = requests.get("http://ceptyconsultant.local:8000/api/resource/get")
     if r.status_code == 200:
         print(r)
-        print(r.json())
         print(r.text)
     # TODO; à modifier, gestion des erreurs
     return "<p>" + str(r.json) + "<p>"
@@ -157,12 +156,13 @@ def post_contrib():
         "user_name": user_name,
         "validate": validate,
     }
+    print(contrib)
     r = requests.post(
         "http://ceptyconsultant.local:8000/api/resource/add_contrib", data=contrib
     )
     if r.status_code == 200:
         print(r)
-        print(r.json())
+        print(r.text)
     # TODO; à modifier, gestion des erreurs
     return "<p>" + str(r.json) + "<p>"
 
@@ -183,12 +183,13 @@ def put_contrib():
     number = request.form.get("change_id")
     new_data = request.form.get("change_modif")
     contrib = {"field": field, "data_number": number, "new_data": new_data}
+    print(contrib)
     r = requests.put(
         "http://ceptyconsultant.local:8000/api/resource/update_contrib", data=contrib
     )
     if r.status_code == 200:
         print(r)
-        print(r.json())
+        print(r.text)
     # TODO; à modifier, gestion des erreurs
     return "<p>" + str(r.json) + "<p>"
 
@@ -204,12 +205,13 @@ def delete():
 def delete_contrib():
     public_id = request.form.get("contrib_name")
     contrib = {"public_id": public_id}
+    print(contrib)
     r = requests.delete(
         "http://ceptyconsultant.local:8000/api/resource/delete_contrib", data=contrib
     )
     if r.status_code == 200:
         print(r)
-        print(r.json())
+        print(r.text)
     # TODO; à modifier, gestion des erreurs
     return "<p>" + str(r.json) + "<p>"
 
