@@ -116,6 +116,7 @@ def get():
     if r.status_code == 200:
         print(r)
         print(r.text)
+        return "Done!"
     # TODO; à modifier, gestion des erreurs
     return "<p>" + str(r.json) + "<p>"
 
@@ -131,8 +132,8 @@ def post():
 def post_contrib():
     user_id = request.form.get("user_id")
     article_id = request.form.get("article_id")
-    user_name = session["username"]
-    last_update = datetime.datetime.now()
+    user_name = session.get("username")
+    last_update = datetime.datetime.now().strftime('%Y-%m-%dT%H:%M:%S')
     validate = request.form.get("validate")
     contrib_type = request.form.get("contrib_type")
     dico_id = request.form.get("dico_id")
@@ -156,15 +157,18 @@ def post_contrib():
         "user_name": user_name,
         "validate": validate,
     }
-    print(contrib)
+    contrib_json = json.dumps(contrib)
     r = requests.post(
-        "http://ceptyconsultant.local:8000/api/resource/add_contrib", data=contrib
+        "http://ceptyconsultant.local:8000/api/resource/add_contrib", data=contrib_json
     )
+    print(r.status_code)
+    print(r.text)
     if r.status_code == 200:
         print(r)
         print(r.text)
+        return "Done!"
     # TODO; à modifier, gestion des erreurs
-    return "<p>" + str(r.json) + "<p>"
+    return "not done"
 
 
 # PUT
@@ -187,9 +191,12 @@ def put_contrib():
     r = requests.put(
         "http://ceptyconsultant.local:8000/api/resource/update_contrib", data=contrib
     )
+    print(r.status_code)
+    print(r.text)
     if r.status_code == 200:
         print(r)
         print(r.text)
+        return "Done!"
     # TODO; à modifier, gestion des erreurs
     return "<p>" + str(r.json) + "<p>"
 
@@ -209,9 +216,12 @@ def delete_contrib():
     r = requests.delete(
         "http://ceptyconsultant.local:8000/api/resource/delete_contrib", data=contrib
     )
+    print(r.status_code)
+    print(r.text)
     if r.status_code == 200:
         print(r)
         print(r.text)
+        return "Done!"
     # TODO; à modifier, gestion des erreurs
     return "<p>" + str(r.json) + "<p>"
 
