@@ -9,18 +9,23 @@ from flask import make_response, flash, redirect, render_template, session
 # Importation des modules pour l'authentification et la sécurité des mots de passe
 from flask_sqlalchemy import SQLAlchemy
 from flask_httpauth import HTTPBasicAuth
-from passlib.apps import custom_app_context as pwd_context # password hash
-from itsdangerous import (TimedJSONWebSignatureSerializer
-                          as Serializer, BadSignature, SignatureExpired) # token
+from passlib.apps import custom_app_context as pwd_context  # password hash
+from itsdangerous import (
+    TimedJSONWebSignatureSerializer as Serializer,
+    BadSignature,
+    SignatureExpired,
+)  # token
 
 import wrangling_json_data as js
 
 # Constructeur de l'API / initialisation
 app = Flask(__name__)
-app.config['SECRET_KEY'] = os.urandom(12)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///db.sqlite'
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False # pour ne pas afficher les messages d'avertissements de SQLAlchemy sur la sortie standard
-app.config['SQLALCHEMY_COMMIT_ON_TEARDOWN'] = True
+app.config["SECRET_KEY"] = os.urandom(12)
+app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///db.sqlite"
+app.config[
+    "SQLALCHEMY_TRACK_MODIFICATIONS"
+] = False  # pour ne pas afficher les messages d'avertissements de SQLAlchemy sur la sortie standard
+app.config["SQLALCHEMY_COMMIT_ON_TEARDOWN"] = True
 
 # Extensions
 db = SQLAlchemy(app)
@@ -28,7 +33,7 @@ auth = HTTPBasicAuth()
 
 # Base de données des utilisateurs
 class User(db.Model):
-    __tablename__ = 'users'
+    __tablename__ = "users"
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(32), index=True)
     password_hash = db.Column(db.String(64))
@@ -43,21 +48,22 @@ class User(db.Model):
 
     def generate_auth_token(self, expiration=600):
         """ Génération d'un token d'authentification avec expiration """
-        s = Serializer(app.config['SECRET_KEY'], expires_in=expiration)
-        return s.dumps({'id': self.id})
+        s = Serializer(app.config["SECRET_KEY"], expires_in=expiration)
+        return s.dumps({"id": self.id})
 
-    @staticmethod # l'utilisateur n'est connu que lorsque le token est décodé
+    @staticmethod  # l'utilisateur n'est connu que lorsque le token est décodé
     def verify_auth_token(token):
         """ Vérification de la validité et de la non expiration du token d'authentification """
-        s = Serializer(app.config['SECRET_KEY'])
+        s = Serializer(app.config["SECRET_KEY"])
         try:
             data = s.loads(token)
         except SignatureExpired:
-            return None    # token valide, mais expiré
+            return None  # token valide, mais expiré
         except BadSignature:
-            return None    # token invalide
-        user = User.query.get(data['id'])
+            return None  # token invalide
+        user = User.query.get(data["id"])
         return user
+
 
 @auth.verify_password
 def verify_password(username_or_token, password):
@@ -76,18 +82,20 @@ def verify_password(username_or_token, password):
 @app.before_request
 def before_request():
     # Déconnexion automatique après 5 minutes d'inactivité
-    session.permanent = True # pour forcer l'expiration au bout d'un certain temps
+    session.permanent = True  # pour forcer l'expiration au bout d'un certain temps
     app.permanent_session_lifetime = datetime.timedelta(minutes=5)
-    session.modified = True # réinitialise le temps
+    session.modified = True  # réinitialise le temps
 
-@app.route('/')
+
+@app.route("/")
 def index():
     return "hello. Je marche et ça c'est une bonne nouvelle!"
 
-@app.route('/login', methods=['POST'])
+
+@app.route("/login", methods=["POST"])
 def login_post():
-    username = request.form.get('username')
-    password = request.form.get('password')
+    username = request.form.get("username")
+    password = request.form.get("password")
 
     user = User.query.filter_by(username=username).first()
 
@@ -96,16 +104,16 @@ def login_post():
         return make_response("authentication error", 401)
 
     # Si l'identifiant et le mot de passe entrés sont correct
-    session['logged_in'] = True
-    session['username'] = username
+    session["logged_in"] = True
+    session["username"] = username
     return make_response("succesful authentication", 200)
 
 
-@app.route('/signup', methods=['POST'])
+@app.route("/signup", methods=["POST"])
 def signup_post():
     # Ajout d'un utilisateur dans la base de données
-    username = request.form.get('username')
-    password = request.form.get('password')
+    username = request.form.get("username")
+    password = request.form.get("password")
     req = request.get_json()
     if username == "" or password == "":
         # Si un champ est vide
@@ -118,6 +126,7 @@ def signup_post():
     db.session.add(user)
     db.session.commit()
     return make_response("ok", 201)
+
 
 """POSE PB: unit trop étroitement front et back end
 @app.route('/logout')
@@ -134,57 +143,65 @@ def logout():
 
 
 # Page des contributions
-@app.route('/contributions', methods=["GET"])
+@app.route("/contributions", methods=["GET"])
 # @auth.login_required
 def contrib():
-    if not session.get('logged_in'):
+    if not session.get("logged_in"):
         return make_response("you must log in ", 401)
     data = js.read_data(js.path_all)
     return make_response("ok", 200)
 
+
 """ Partie pour l'API """
 
-@app.route('/api/users', methods=['POST'])
+
+@app.route("/api/users", methods=["POST"])
 def new_user():
     # Ajout d'un nouvel utilisateur
-    username = request.json.get('username')
-    password = request.json.get('password')
+    username = request.json.get("username")
+    password = request.json.get("password")
     if username is None or password is None:
-        abort(400)    # champ manquant
+        abort(400)  # champ manquant
     if User.query.filter_by(username=username).first() is not None:
-        abort(400)    # utilisateur existant déjà
+        abort(400)  # utilisateur existant déjà
     user = User(username=username)
     user.hash_password(password)
     db.session.add(user)
     db.session.commit()
-    return (jsonify({'username': user.username}), 201,
-            {'Location': url_for('get_user', id=user.id, _external=True)})
+    return (
+        jsonify({"username": user.username}),
+        201,
+        {"Location": url_for("get_user", id=user.id, _external=True)},
+    )
 
-@app.route('/api/users/<int:id>')
+
+@app.route("/api/users/<int:id>")
 def get_user(id):
     # Renvoie le nom d'utilisateur
     user = User.query.get(id)
     if not user:
         abort(400)
-    return jsonify({'username': user.username})
+    return jsonify({"username": user.username})
 
-@app.route('/api/token')
-#@auth.login_required
+
+@app.route("/api/token")
+# @auth.login_required
 def get_auth_token():
     # Renvoie le token d'authentification qui doit être mis dans le champ "Username" avec le type "Basic Auth" sur Postman
     token = g.user.generate_auth_token(600)
-    return jsonify({'token': token.decode('ascii'), 'duration': 600})
+    return jsonify({"token": token.decode("ascii"), "duration": 600})
 
-@app.route('/api/resource')
-#@auth.login_required
+
+@app.route("/api/resource")
+# @auth.login_required
 def get_resource():
     # Renvoie un message de salutation à l'utilisateur
-    return jsonify({'data': 'Hello, %s!' % g.user.username})
+    return jsonify({"data": "Hello, %s!" % g.user.username})
 
 
 # POST: Permet d'ajouter une contribution à la BD
 @app.route("/api/resource/add_contrib", methods=["POST"])
-#@auth.login_required
+# @auth.login_required
 def json_post():
     # vérification du format de la requête (JSON + clés requises)
     if request.is_json:
@@ -194,52 +211,65 @@ def json_post():
                 "message": "JSON received!",
                 "sender": req.get("user_name"),
                 "timestamp": datetime.datetime.now(),
-                "contrib_name": req.get("contrib_name")
+                "contrib_name": req.get("contrib_name"),
             }
             js.write_data(req, js.path_all)
             res = make_response(jsonify(response_body), 200)
             return res
         else:
-            return make_response(jsonify({"message": "Wrong data structure, check these fields exist in your request: "+ str(js.required_keys)}), 400)
+            return make_response(
+                jsonify(
+                    {
+                        "message": "Wrong data structure, check these fields exist in your request: "
+                        + str(js.required_keys)
+                    }
+                ),
+                400,
+            )
     else:
         return make_response(jsonify({"message": "Request body must be JSON"}), 400)
 
+
 # GET: Permet de parser le fichier JSON pour consulter des données (ici, toutes)
 @app.route("/api/resource/get", methods=["GET"])
-#@auth.login_required
+# @auth.login_required
 def json_read():
     data = js.read_data(js.path_all)
-    return make_response(jsonify(data),200)
+    return make_response(jsonify(data), 200)
+
 
 # GET: l'ajout du nombre x dans l'url permet d'accéder à la contribution numéro x
 @app.route("/api/resource/get/<int:num>", methods=["GET"])
-#@auth.login_required
+# @auth.login_required
 def json_read_num(num):
     data = js.read_data(js.path_all)
     data = data[num]
-    return make_response(jsonify(data),200)
+    return make_response(jsonify(data), 200)
+
 
 # GET: l'ajout du champ y dans l'url permet d'accéder à ce champ dans toutes les contributions
 @app.route("/api/resource/get/<string:field>", methods=["GET"])
-#@auth.login_required
+# @auth.login_required
 def json_read_field(field):
     data = js.read_data(js.path_all)
     fields = []
     for i in data:
         fields.append(i[field])
-    return make_response(jsonify(fields),200)
+    return make_response(jsonify(fields), 200)
+
 
 # GET: l'ajout du nombre x + champ y dans l'url permet d'accéder au champ y de la contribution x
 @app.route("/api/resource/get/<int:num>/<string:field>", methods=["GET"])
-#@auth.login_required
+# @auth.login_required
 def json_read_num_field(num, field):
     data = js.read_data(js.path_all)
     data = data[num][field]
-    return make_response(jsonify(data),200)
+    return make_response(jsonify(data), 200)
+
 
 # PUT: Modifie la valeur d'un champ dans une contribution donnée. Si aucun numéro de contribution n'est indiqué, le champ sera modifié dans toutes les contributions
 @app.route("/api/resource/update_contrib", methods=["PUT"])
-#@auth.login_required
+# @auth.login_required
 def json_updated():
     if request.is_json:
         req = request.get_json()
@@ -253,18 +283,27 @@ def json_updated():
                 "timestamp": datetime.datetime.now(),
                 "field": category,
                 "data_number": data_number,
-                "new_data": new_data
+                "new_data": new_data,
             }
             res = make_response(jsonify(response_body), 200)
             return res
         else:
-            return make_response(jsonify({"message": "Wrong data structure, check these fields exist in your request: "+ str(js.required_update_keys)}), 400)
+            return make_response(
+                jsonify(
+                    {
+                        "message": "Wrong data structure, check these fields exist in your request: "
+                        + str(js.required_update_keys)
+                    }
+                ),
+                400,
+            )
     else:
         return make_response(jsonify({"message": "Request body must be JSON"}), 400)
 
+
 # DELETE: efface la contribution numéro x (x donné dans la requête)
 @app.route("/api/resource/delete_contrib", methods=["DELETE"])
-#@auth.login_required
+# @auth.login_required
 def json_delete():
     if request.is_json:
         req = request.get_json()
@@ -274,18 +313,26 @@ def json_delete():
             response_body = {
                 "message": "Data successfully deleted!",
                 "timestamp": datetime.datetime.now(),
-                "data_deleted": req
+                "data_deleted": req,
             }
             res = make_response(jsonify(response_body), 200)
             return res
         else:
-            return make_response(jsonify({"message": "Wrong data structure, check these fields exist in your request: "+ str(js.required_delete_keys)}), 400)
+            return make_response(
+                jsonify(
+                    {
+                        "message": "Wrong data structure, check these fields exist in your request: "
+                        + str(js.required_delete_keys)
+                    }
+                ),
+                400,
+            )
     else:
         return make_response(jsonify({"message": "Request body must be JSON"}), 400)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     # Création de la base de données des utilisateurs si elle n'existe pas
-    if not os.path.exists('db.sqlite'):
+    if not os.path.exists("db.sqlite"):
         db.create_all()
     app.run(debug=True, host="0.0.0.0")
