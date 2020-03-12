@@ -89,7 +89,7 @@ def logout():
         return redirect(url_for("login"))
     session.pop("username", None)
     session["logged_in"] = False
-    return redirect(url_for("index"))
+    return redirect(url_for("idx"))
 
 
 # GET
