@@ -8,14 +8,16 @@
 <ul id="navigation">
 	<table border=1>
 	<tr>
-    <td>public_id</td>
+		<td>N° contribution</td>
+		<td>public_id</td>
 		<td>user_name</td>
 		<td>contrib_name</td>
 		<td>last_update</td>
 	</tr>
 	{% for item in params %}
 	<tr>
-    <td><a href="{{ item.href }}">{{ item.public_id }}</a></td>
+		<td>{{ loop.index - 1 }}</td>
+		<td><a href="{{ item.href }}">{{ item.public_id }}</a></td>
 		<td><a href="{{ item.href }}">{{ item.user_name }}</a></td>
 		<td><a href="{{ item.href }}">{{ item.contrib_name }}</a></td>
 		<td><a href="{{ item.href }}">{{ item.last_update }}</a></td>
