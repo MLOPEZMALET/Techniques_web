@@ -107,9 +107,7 @@ def login_post():
     session["logged_in"] = True
     session["username"] = username
     session['user_id'] = user.uid
-    return (
-        make_response(user.uid, 200)
-    )
+    return (make_response(user.uid, 200))
 
 
 @app.route("/signup", methods=["POST"])
@@ -335,4 +333,4 @@ if __name__ == "__main__":
     # Création de la base de données des utilisateurs si elle n'existe pas
     if not os.path.exists("db.sqlite"):
         db.create_all()
-    app.run(debug=True, host="0.0.0.0")
+    app.run(debug=True, host="0.0.0.0", port=8000)
