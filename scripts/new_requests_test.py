@@ -14,7 +14,6 @@ app.config["SECRET_KEY"] = os.urandom(12)
 def index():
     return render_template("index.html", logged=session.get("logged_in"))
 
-
 # Page d'authentification qui apparait aux personnes non connectees
 @app.route("/login", endpoint="login")
 def login():
@@ -73,7 +72,7 @@ def signup_post():
         return redirect(url_for("signup"))
     else:
         user = {"username": username, "password": password}
-        r_signup = requests.post("http://ceptyconsultant.local:8000/api/users", data=user)
+        r_signup = requests.post("http://ceptyconsultant.local:8000/signup", data=user)
         print(r_signup.text, r_signup.status_code, r_signup.json)
         if r_signup.status_code == 201:
             return redirect(url_for("login"))
