@@ -159,11 +159,9 @@ def post_contrib():
         "http://ceptyconsultant.local:8000/api/resource/add_contrib", json=contrib
     )
     print(r.status_code)
-    print(r.text)
+    response = r.json()
     if r.status_code == 200:
-        print(r)
-        print(r.text)
-        return "Done!"
+        return render_template("success_ajout.html", logged=session.get("logged_in"))
     # TODO; à modifier, gestion des erreurs
     return "not done"
 
