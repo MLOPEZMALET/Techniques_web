@@ -239,7 +239,7 @@ def json_updated():
             category = req["field"]
             data_number = req["data_number"]
             new_data = req["new_data"]
-            js.update_data(category, new_data, js.path_all, data_number=None)
+            js.update_data(category, new_data, js.path_all, data_number)
             response_body = {
                 "message": "Data successfully updated!",
                 "timestamp": datetime.datetime.now(),

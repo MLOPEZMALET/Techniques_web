@@ -25,12 +25,14 @@ def update_data(category, new_data, path, data_number):
         for i in range(len(data["contributions"]["data"])):
             if data["contributions"]["data"][i]["public_id"] == data_number:
                 data["contributions"]["data"][i][category] = new_data
+                print(data["contributions"]["data"][i][category])
                 break
         #if data_number is None:
         #    for i in data["contributions"]["data"]:
         #        i[category] = new_data
         #else:
         #    data["contributions"]["data"][data_number][category] = new_data
+    print(data["contributions"]["data"][i][category])
     with open(path, "w") as jsonFile:
         json.dump(data, jsonFile, indent=3)
 
@@ -81,7 +83,7 @@ required_delete_keys = ["public_id"]
 #print(db_1[-1])
 # ___TEST_UPDATING
 
-#update_data("user_name", "BARGIER", path_read, path_write, -1)
+# update_data("user_name", "BARGIER", path_all, "885980e9-d559-4b9c-8878-4d63aed4cebb")
 
 #__TEST_DELETING____
 
