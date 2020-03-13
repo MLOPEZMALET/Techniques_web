@@ -1,7 +1,6 @@
 #!/bin/bash
 
 sudo mkdir /var/ceptyconsultant
-sudo mkdir /var/ceptyconsultant/
 
 # SUPERVISOR
 sudo mv conf/supervisor/api.conf /etc/supervisor/conf.d/
