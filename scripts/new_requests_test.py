@@ -82,7 +82,6 @@ def signup_post():
         else:
             return "Let's debug!"
 
-
 @app.route("/logout")
 # @auth.login_required
 def logout():
@@ -128,11 +127,11 @@ def get():
 def post():
     if session.get("logged_in"):
         return render_template("ajout.html", logged=session.get("logged_in"))
-
+    return redirect(url_for("login"))
 
 @app.route("/add_contrib", methods=["POST"])
 def post_contrib():
-    user_id = request.form.get("user_id")
+    user_id = session.get("user_id")
     article_id = request.form.get("article_id")
     user_name = session.get("username")
     last_update = datetime.datetime.now().strftime('%Y-%m-%dT%H:%M:%S')
@@ -159,9 +158,8 @@ def post_contrib():
         "user_name": user_name,
         "validate": validate,
     }
-    contrib_json = json.dumps(contrib)
     r = requests.post(
-        "http://ceptyconsultant.local:8000/api/resource/add_contrib", data=contrib_json
+        "http://ceptyconsultant.local:8000/api/resource/add_contrib", json=contrib
     )
     print(r.status_code)
     print(r.text)
@@ -180,18 +178,20 @@ def post_contrib():
 def put():
     if session.get("logged_in"):
         return render_template("modif.html", logged=session.get("logged_in"))
-
+    return redirect(url_for("login"))
 
 @app.route("/update_contrib", methods=["PUT"])
 def put_contrib():
     # changer avec formulaire
+    print("UPDATE CONTRIBUTION")
     field = request.form.get("change_input")
     number = request.form.get("change_id")
     new_data = request.form.get("change_modif")
+    
     contrib = {"field": field, "data_number": number, "new_data": new_data}
-    print(contrib)
+    
     r = requests.put(
-        "http://ceptyconsultant.local:8000/api/resource/update_contrib", data=contrib
+        "http://ceptyconsultant.local:8000/api/resource/update_contrib", json=contrib
     )
     print(r.status_code)
     print(r.text)
@@ -202,21 +202,20 @@ def put_contrib():
     # TODO; à modifier, gestion des erreurs
     return "<p>" + str(r.json) + "<p>"
 
-
 # DELETE
 @app.route("/delete_contrib", endpoint="delete")
 def delete():
     if session.get("logged_in"):
         return render_template("delete.html", logged=session.get("logged_in"))
-
+    return redirect(url_for("login"))
 
 @app.route("/delete_contrib", methods=["DELETE"])
 def delete_contrib():
+    print("DELETE CONTRIBUTION")
     public_id = request.form.get("contrib_name")
     contrib = {"public_id": public_id}
-    print(contrib)
     r = requests.delete(
-        "http://ceptyconsultant.local:8000/api/resource/delete_contrib", data=contrib
+        "http://ceptyconsultant.local:8000/api/resource/delete_contrib", json=contrib
     )
     print(r.status_code)
     print(r.text)
