@@ -3,7 +3,7 @@ import requests
 import os
 from flask import Flask, abort, request, jsonify, g, url_for, Response
 from flask import flash, redirect, render_template, session
-from flask_httpauth import HTTPBasicAuth
+
 import datetime
 import json
 
@@ -151,11 +151,11 @@ def post_contrib():
         "http://ceptyconsultant.local:8000/api/resource/add_contrib", json=contrib
     )
     print(r.status_code)
-    print(r.text)
+    # print(r.text)
     if r.status_code == 200:
-        print(r)
-        print(r.text)
-        return "Done!"
+        # print(r)
+        # print(r.text)
+        return render_template("success_ajout.html", logged=session.get("logged_in"))
     # TODO; à modifier, gestion des erreurs
     return "not done"
 
