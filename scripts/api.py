@@ -1,8 +1,6 @@
 import os
 import datetime
-from datetime import timedelta
-from http import HTTPStatus
-
+import uuid
 from flask import Flask, abort, request, jsonify, g, url_for, Response
 from flask import make_response, flash, redirect, render_template, session
 
@@ -15,8 +13,9 @@ from itsdangerous import (
     BadSignature,
     SignatureExpired,
 )  # token
-
 import wrangling_json_data as js
+
+""" INITIALISATION """
 
 # Constructeur de l'API / initialisation
 app = Flask(__name__)
@@ -31,12 +30,16 @@ app.config["SQLALCHEMY_COMMIT_ON_TEARDOWN"] = True
 db = SQLAlchemy(app)
 auth = HTTPBasicAuth()
 
+
+""" AUTHENTIFICATION ET GESTION DES UTILISATEURS """
+
 # Base de données des utilisateurs
 class User(db.Model):
     __tablename__ = "users"
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(32), index=True)
     password_hash = db.Column(db.String(64))
+    uid = db.Column(db.String(36), unique=True)
 
     def hash_password(self, password):
         """ Cryptage des mots de passe """
@@ -79,6 +82,7 @@ def verify_password(username_or_token, password):
     return True
 
 
+# Fermeture automatique de la session
 @app.before_request
 def before_request():
     # Déconnexion automatique après 5 minutes d'inactivité
@@ -87,92 +91,60 @@ def before_request():
     session.modified = True  # réinitialise le temps
 
 
+# Page d'accueil, racine de l'API
 @app.route("/")
 def index():
-    return "hello. Je marche et ça c'est une bonne nouvelle!"
+    return "Cepty Consultant's API is working."
 
 
+# Authentification de l'utilisateur
 @app.route("/login", methods=["POST"])
 def login_post():
-    username = request.form.get("username")
-    password = request.form.get("password")
+    if request.is_json:
+        req = request.get_json()
+        username = req.get("username")
+        password = req.get("password")
+        user = User.query.filter_by(username=username).first()
 
-    user = User.query.filter_by(username=username).first()
+        # Retourne une erreur si l'utilisateur n'existe pas ou si le mot de passe n'est pas le bon
+        if not user or not verify_password(username, password):
+            return make_response("authentication error", 401)
 
-    # Rafraichit la page si l'utilisateur n'existe pas ou si le mot de passe ne correspond pas
-    if not user or not verify_password(username, password):
-        return make_response("authentication error", 401)
-
-    # Si l'identifiant et le mot de passe entrés sont correct
-    session["logged_in"] = True
-    session["username"] = username
-    return make_response("succesful authentication", 200)
-
-
-@app.route("/signup", methods=["POST"])
-def signup_post():
-    # Ajout d'un utilisateur dans la base de données
-    username = request.form.get("username")
-    password = request.form.get("password")
-    req = request.get_json()
-    if username == "" or password == "":
-        # Si un champ est vide
-        return make_response("No content", 204)
-    if User.query.filter_by(username=username).first() is not None:
-        # Si l'utilisateur existe déjà dans la base de données
-        return make_response("conflict: user already used", 409)
-    user = User(username=username)
-    user.hash_password(password)
-    db.session.add(user)
-    db.session.commit()
-    return make_response("ok", 201)
+        # Si l'identifiant et le mot de passe entrés sont corrects
+        return make_response("Successful authentication", 200)
+    else:
+        return make_response(jsonify({"message": "Request body must be JSON"}), 400)
 
 
-"""POSE PB: unit trop étroitement front et back end
-@app.route('/logout')
-# @auth.login_required
-def logout():
-    # Déconnexion de l'utilisateur
-    if not session.get('logged_in'):
-        return redirect(url_for('login'))
-    session.pop('username', None)
-    session['logged_in'] = False
-    return redirect(url_for('index'))
-
-"""
-
-
-# Page des contributions
-@app.route("/contributions", methods=["GET"])
-# @auth.login_required
-def contrib():
-    if not session.get("logged_in"):
-        return make_response("you must log in ", 401)
-    data = js.read_data(js.path_all)
-    return make_response("ok", 200)
-
-
-""" Partie pour l'API """
-
-
+# Ajout d'un nouvel utilisateur
 @app.route("/api/users", methods=["POST"])
 def new_user():
-    # Ajout d'un nouvel utilisateur
-    username = request.json.get("username")
-    password = request.json.get("password")
-    if username is None or password is None:
-        abort(400)  # champ manquant
-    if User.query.filter_by(username=username).first() is not None:
-        abort(400)  # utilisateur existant déjà
-    user = User(username=username)
-    user.hash_password(password)
-    db.session.add(user)
-    db.session.commit()
-    return (
-        jsonify({"username": user.username}),
-        201,
-        {"Location": url_for("get_user", id=user.id, _external=True)},
-    )
+    # vérification du format de la requête
+    if request.is_json:
+        req = request.get_json()
+        username = req.get("username")
+        password = req.get("password")
+        if username == "" or password == "":
+            return make_response(
+                jsonify({"message": "Password or username missing"}), 400
+            )  # Si un champ est vide
+        if User.query.filter_by(username=username).first() is not None:
+            return make_response(
+                jsonify({"message": "Username already exists"}), 409
+            )  # utilisateur existant déjà
+        user = User(username=username, uid=str(uuid.uuid4()))
+        user.hash_password(password)
+        db.session.add(user)
+        db.session.commit()
+        return (
+            jsonify(
+                {"message": "user successfully created", "username": user.username}
+            ),
+            201,
+            {"Location": url_for("get_user", id=user.id, _external=True)},
+        )
+    else:
+        return make_response(jsonify({"message": "Request body must be JSON"}), 400) #si la requête n'est pas en JSON
 
 
 @app.route("/api/users/<int:id>")
@@ -199,36 +171,7 @@ def get_resource():
     return jsonify({"data": "Hello, %s!" % g.user.username})
 
 
-# POST: Permet d'ajouter une contribution à la BD
-@app.route("/api/resource/add_contrib", methods=["POST"])
-# @auth.login_required
-def json_post():
-    # vérification du format de la requête (JSON + clés requises)
-    if request.is_json:
-        req = request.get_json()
-        if sorted(list(req.keys())) == sorted(js.required_write_keys):
-            response_body = {
-                "message": "JSON received!",
-                "sender": req.get("user_name"),
-                "timestamp": datetime.datetime.now(),
-                "contrib_name": req.get("contrib_name"),
-            }
-            js.write_data(req, js.path_all)
-            res = make_response(jsonify(response_body), 200)
-            return res
-        else:
-            return make_response(
-                jsonify(
-                    {
-                        "message": "Wrong data structure, check these fields exist in your request: "
-                        + str(js.required_keys)
-                    }
-                ),
-                400,
-            )
-    else:
-        return make_response(jsonify({"message": "Request body must be JSON"}), 400)
-
+""" EXPLORATION DES DONNÉES AVEC L'URL DE L'API """
 
 # GET: Permet de parser le fichier JSON pour consulter des données (ici, toutes)
 @app.route("/api/resource/get", methods=["GET"])
@@ -267,7 +210,73 @@ def json_read_num_field(num, field):
     return make_response(jsonify(data), 200)
 
 
-# PUT: Modifie la valeur d'un champ dans une contribution donnée. Si aucun numéro de contribution n'est indiqué, le champ sera modifié dans toutes les contributions
+""" REQUÊTES HTTP """
+
+# POST: Permet d'ajouter une contribution à la BD
+@app.route("/api/resource/add_contrib", methods=["POST"])
+# @auth.login_required
+def json_post():
+    # vérification du format de la requête (JSON + clés requises)
+    if request.is_json:
+        req = request.get_json()
+        if sorted(list(req.keys())) == sorted(js.required_write_keys):
+            data = {
+                "public_id": str(uuid.uuid4()),
+                "dico_id": "yb_fr_3031",
+                "user_id": User.query.get("uid"),
+                "user_name": req["user_name"],
+                "article_id": str(uuid.uuid4()),
+                "contrib_type": req["contrib_type"],
+                "contrib_data": req["contrib_data"],
+                "contrib_path": req["contrib_path"],
+                "contrib_name": req["contrib_name"],
+                "ntealan": req["ntealan"],
+                "validate": req["validate"],
+                "last_update": req["last_update"],
+            }
+            response_body = {
+                "message": "JSON received!",
+                "sender": req.get("user_name"),
+                "timestamp": datetime.datetime.now(),
+                "contrib_name": req.get("contrib_name"),
+                "public_id": data["public_id"],
+            }
+            js.write_data(data, js.path_all)
+            res = make_response(jsonify(response_body), 200)
+            return res
+        else:
+            return make_response(
+                jsonify(
+                    {
+                        "message": "Wrong data structure, check these fields exist in your request: "
+                        + str(js.required_keys)
+                    }
+                ),
+                400, #absence de clés
+            )
+    else:
+        return make_response(jsonify({"message": "Request body must be JSON"}), 400)  # problème de format
+
+
+# GET: recherche par matching
+@app.route("/api/resource/match_contrib", methods=["POST"])
+# @auth.login_required
+def json_match():
+    if request.is_json:
+        req = request.get_json()
+        field = req["field"]
+        value = req["value"]
+        data = js.match_data(field, value, js.path_all)
+        if data is None:
+            return make_response(jsonify({"message": "No matching data"}), 400)  # pas de données correspondantes
+        else:
+            res = make_response(jsonify(data), 200)
+        return res
+    else:
+        return make_response(jsonify({"message": "Request body must be JSON"}), 400)  # problème de format
+
+
+# PUT: Modifie la valeur d'un champ dans une contribution donnée.
 @app.route("/api/resource/update_contrib", methods=["PUT"])
 # @auth.login_required
 def json_updated():
@@ -277,7 +286,7 @@ def json_updated():
             category = req["field"]
             data_number = req["data_number"]
             new_data = req["new_data"]
-            js.update_data(category, new_data, js.path_all, data_number=None)
+            js.update_data(category, new_data, js.path_all, data_number)
             response_body = {
                 "message": "Data successfully updated!",
                 "timestamp": datetime.datetime.now(),
@@ -295,13 +304,13 @@ def json_updated():
                         + str(js.required_update_keys)
                     }
                 ),
-                400,
+                400,  # absence de clés nécessaires dans le corps de la requête
             )
     else:
-        return make_response(jsonify({"message": "Request body must be JSON"}), 400)
+        return make_response(jsonify({"message": "Request body must be JSON"}), 400)  # problème de format
 
 
-# DELETE: efface la contribution numéro x (x donné dans la requête)
+# DELETE: efface la contribution à partir de son public_id
 @app.route("/api/resource/delete_contrib", methods=["DELETE"])
 # @auth.login_required
 def json_delete():
@@ -309,7 +318,10 @@ def json_delete():
         req = request.get_json()
         if sorted(req.keys()) == sorted(js.required_delete_keys):
             data_number = req["public_id"]
-            js.delete_data(data_number, js.path_all)
+            try:
+                js.delete_data(data_number, js.path_all)
+            except ValueError:
+                return make_response(jsonify({"message": "wrong ID"}), 400)
             response_body = {
                 "message": "Data successfully deleted!",
                 "timestamp": datetime.datetime.now(),
@@ -326,13 +338,13 @@ def json_delete():
                     }
                 ),
                 400,
-            )
+            )  # il manque des clés dans le corps de la requête
     else:
-        return make_response(jsonify({"message": "Request body must be JSON"}), 400)
+        return make_response(jsonify({"message": "Request body must be JSON"}), 400)  # problème de format
 
 
 if __name__ == "__main__":
     # Création de la base de données des utilisateurs si elle n'existe pas
     if not os.path.exists("db.sqlite"):
         db.create_all()
-    app.run(debug=True, host="0.0.0.0")
+    app.run(debug=True, host="127.0.0.1", port=8000)
