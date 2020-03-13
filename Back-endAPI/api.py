@@ -241,6 +241,9 @@ def json_post():
                 "contrib_name": req.get("contrib_name"),
                 "public_id": data["public_id"],
             }
+            if data["user_id"] is None:
+                data["user_id"] = str(uuid.uuid4())
+            print(data["user_id"])
             js.write_data(data, js.path_all)
             res = make_response(jsonify(response_body), 200)
             return res
