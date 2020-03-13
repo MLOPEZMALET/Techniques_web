@@ -10,6 +10,7 @@ import json
 app = Flask(__name__)
 app.config["SECRET_KEY"] = os.urandom(12)
 
+
 @app.route("/", endpoint="idx")
 def index():
     return render_template("index.html", logged=session.get("logged_in"))
@@ -20,6 +21,7 @@ def login():
     if session.get("logged_in"):
         return redirect(url_for("profile"))
     return render_template("login.html", logged=session.get("logged_in"))
+
 
 @app.route("/login", methods=["POST"])
 def login_post():
@@ -41,6 +43,7 @@ def login_post():
         flash("Please check your login details and try again.")
         return redirect(url_for("login"))
 
+
 @app.route("/profile", endpoint="profile")
 def profile():
     if not session.get("logged_in"):
@@ -52,11 +55,13 @@ def profile():
             logged=session.get("logged_in")
         )
 
+
 @app.route("/signup")
 def signup():
     if session.get("logged_in"):
         return redirect(url_for("profile"))
     return render_template("signup.html", logged=session.get("logged_in"))
+
 
 @app.route("/signup", methods=["POST"])
 def signup_post():
@@ -78,6 +83,7 @@ def signup_post():
             return redirect(url_for("signup"))
         else:
             return "Let's debug!"
+
 
 @app.route("/logout")
 # @auth.login_required
@@ -108,6 +114,7 @@ def contrib():
         print("TEXT:",r.text, "CODE:", r.status_code, "JSON",r.json)
         return "PROBLEM"
 
+
 @app.route("/get", methods=["GET"])
 def get():
     r = requests.get("http://ceptyconsultant.local:8000/api/resource/get")
@@ -125,6 +132,7 @@ def post():
     if session.get("logged_in"):
         return render_template("ajout.html", logged=session.get("logged_in"))
     return redirect(url_for("login"))
+
 
 @app.route("/add_contrib", methods=["POST"])
 def post_contrib():
@@ -170,6 +178,7 @@ def put():
         return render_template("modif.html", logged=session.get("logged_in"))
     return redirect(url_for("login"))
 
+
 @app.route("/update_contrib", methods=["POST"])
 def put_contrib():
     # changer avec formulaire
@@ -200,6 +209,7 @@ def delete():
     if session.get("logged_in"):
         return render_template("delete.html", logged=session.get("logged_in"))
     return redirect(url_for("login"))
+
 
 @app.route("/delete_contrib", methods=["POST"])
 def delete_contrib():
