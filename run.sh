@@ -26,3 +26,10 @@ sudo mv conf/cepty_front.conf /etc/nginx/sites-available/
 ln -s /etc/nginx/sites-available/cepty_back.conf /etc/nginx/sites-enabled/
 ln -s /etc/nginx/sites-available/cepty_front.conf /etc/nginx/sites-enabled/
 
+cd ceptyconsultant.local
+
+python3.7 -m pipenv install -r requirements.txt
+python3.7 -m pipenv shell
+
+sudo supervisorctl restart all
+
