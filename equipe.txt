@@ -1,4 +1,5 @@
- Lili Wu  - 
- Afala Phaxay - 
- Maëva Leproux  - 
- Mélanie Lopez Malet  - 
+ Le contenu de ce fichier est purement indicatif puisque nous avons toutes participé à chaque étape du travail.
+ Lili Wu  - Unitests
+ Afala Phaxay - Serveurs
+ Maëva Leproux  - HTML/CSS/jinja
+ Mélanie Lopez Malet  - requêtes (lien entre front-end et back-end)
