@@ -1,9 +1,5 @@
 #!/bin/bash
 
-
-sudo mkdir /etc/nginx/logs/
-sudo mkdir /etc/nginx/logs/ceptyconsultant.local
-
 sudo mv conf/ssl/private/cepty_back.key /etc/ssl/private/
 sudo mv conf/ssl/private/cepty_front.key /etc/ssl/private/
 sudo mv conf/ssl/certs/cepty_back.crt /etc/ssl/certs/
