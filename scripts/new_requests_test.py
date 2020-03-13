@@ -25,17 +25,17 @@ def login():
 def login_post():
     username = request.form.get("username")
     password = request.form.get("password")
-    
+
     user = {"username": username, "password": password}
-    
+
     r_login = requests.post("http://ceptyconsultant.local:8000/login", json=user)
-    
+
     print(r_login.text, r_login.status_code, r_login.json)
     if r_login.status_code == 200:
         # Si l'identifiant et le mot de passe entrés sont corrects
         session["logged_in"] = True
         session["username"] = username
-        
+
         return redirect(url_for("profile"))
     else:
         flash("Please check your login details and try again.")
@@ -169,16 +169,16 @@ def put():
         return render_template("modif.html", logged=session.get("logged_in"))
     return redirect(url_for("login"))
 
-@app.route("/update_contrib", methods=["PUT"])
+@app.route("/update_contrib", methods=["POST"])
 def put_contrib():
     # changer avec formulaire
     print("UPDATE CONTRIBUTION")
     field = request.form.get("change_input")
     number = request.form.get("change_id")
     new_data = request.form.get("change_modif")
-    
+
     contrib = {"field": field, "data_number": number, "new_data": new_data}
-    
+
     r = requests.put(
         "http://ceptyconsultant.local:8000/api/resource/update_contrib", json=contrib
     )
@@ -187,7 +187,7 @@ def put_contrib():
     if r.status_code == 200:
         print(r)
         print(r.text)
-        return "Done!"
+        return render_template("success_modif.html", logged=session.get("logged_in"))
     # TODO; à modifier, gestion des erreurs
     return "<p>" + str(r.json) + "<p>"
 
@@ -198,7 +198,7 @@ def delete():
         return render_template("delete.html", logged=session.get("logged_in"))
     return redirect(url_for("login"))
 
-@app.route("/delete_contrib", methods=["DELETE"])
+@app.route("/delete_contrib", methods=["POST"])
 def delete_contrib():
     print("DELETE CONTRIBUTION")
     public_id = request.form.get("contrib_name")
@@ -211,7 +211,7 @@ def delete_contrib():
     if r.status_code == 200:
         print(r)
         print(r.text)
-        return "Done!"
+        return render_template("success_delete.html", logged=session.get("logged_in"))
     # TODO; à modifier, gestion des erreurs
     return "<p>" + str(r.json) + "<p>"
 
