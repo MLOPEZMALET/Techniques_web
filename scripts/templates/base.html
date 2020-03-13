@@ -34,7 +34,7 @@
 							{% endif %}
 							{% if logged %}
 								<a href="{{ url_for('contrib') }}" class="navbar-item">Contributions</a>
-								
+
 								<a href="{{ url_for('logout') }}" class="navbar-item">
 									Logout
 								</a>
@@ -51,6 +51,9 @@
 					<div id="navbar" class="collapse">
 						<div id="essai">
 							<ul>
+                <li ><a href="{{ url_for('match') }}" class="navbar-item">
+										Recherche de contribution
+									</a></li>
 								<li ><a href="{{ url_for('post') }}" class="navbar-item">
 										Ajout de contribution
 									</a></li>

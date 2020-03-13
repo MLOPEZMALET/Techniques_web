@@ -141,7 +141,7 @@ def match_contrib():
         print(r)
         print(r.status_code)
         print(r.text)
-        flash("Unexpected error. Please try again.")
+        flash("No matching data. Please try again.")
         return redirect(url_for("match"))
 
 

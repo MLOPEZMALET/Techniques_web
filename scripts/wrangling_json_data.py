@@ -57,6 +57,23 @@ def delete_data(data_number, path):
         else:
             raise ValueError("wrong ID")
 
+def match_data(field, value, path):
+    with open(path, "r") as read_file:
+        data = json.load(read_file)
+        tracker = False
+        res = []
+        for i in range(len(data["contributions"]["data"])):
+            if data["contributions"]["data"][i][field] == value:
+                res.append(data["contributions"]["data"][i])
+                print(res)
+                tracker = True
+            else:
+                continue
+        if tracker == True:
+            return res
+        else:
+            return None
+
 
 # Chemin relatif vers la BD JSON
 path_all = "../data/DONNEES_CLIENT.json"
@@ -90,3 +107,7 @@ required_delete_keys = ["public_id"]
 #__TEST_DELETING____
 
 # delete_data("8ad93a62-9437-416f-93c6-948a2c15b45b", path_all)
+
+#__TEST MATCHING__
+
+match_data("user_name", "lko", path_all)
