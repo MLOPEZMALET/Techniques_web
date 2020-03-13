@@ -190,8 +190,9 @@ def put_contrib():
         print(r.text)
         return render_template("success_modif.html", logged=session.get("logged_in"))
     # TODO; à modifier, gestion des erreurs
-    flash("Please check you have a correct ID and try again.")
-    return redirect(url_for("put"))
+    else:
+        flash("Please check you have a correct ID and try again.")
+        return redirect(url_for("put"))
 
 # DELETE
 @app.route("/delete_contrib", endpoint="delete")
@@ -215,8 +216,9 @@ def delete_contrib():
         print(r.text)
         return render_template("success_delete.html", logged=session.get("logged_in"))
     # TODO; à modifier, gestion des erreurs
-    flash("Please check your public_id is correct and try again.")
-    return redirect(url_for("delete"))
+    else:
+        flash("Please check your public_id is correct and try again.")
+        return redirect(url_for("delete"))
 
 
 if __name__ == "__main__":
