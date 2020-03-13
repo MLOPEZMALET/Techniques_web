@@ -22,19 +22,21 @@ def write_data(new_data, path):
 def update_data(category, new_data, path, data_number):
     with open(path, "r") as read_file:
         data = json.load(read_file)
+        tracker = False
         for i in range(len(data["contributions"]["data"])):
             if data["contributions"]["data"][i]["public_id"] == data_number:
                 data["contributions"]["data"][i][category] = new_data
                 print(data["contributions"]["data"][i][category])
+                tracker = True
                 break
-        #if data_number is None:
-        #    for i in data["contributions"]["data"]:
-        #        i[category] = new_data
-        #else:
-        #    data["contributions"]["data"][data_number][category] = new_data
-    print(data["contributions"]["data"][i][category])
-    with open(path, "w") as jsonFile:
-        json.dump(data, jsonFile, indent=3)
+            else:
+                continue
+        if tracker == True:
+            with open(path, "w") as jsonFile:
+                json.dump(data, jsonFile, indent=3)
+        else:
+            raise ValueError("wrong ID")
+
 
 
 # Supprime une contribution de Data
