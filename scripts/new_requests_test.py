@@ -157,7 +157,8 @@ def post_contrib():
         # print(r.text)
         return render_template("success_ajout.html", logged=session.get("logged_in"))
     # TODO; à modifier, gestion des erreurs
-    return "not done"
+    flash("Unexpected error. Please try again.")
+    return redirect(url_for("post"))
 
 
 # PUT
@@ -189,7 +190,8 @@ def put_contrib():
         print(r.text)
         return render_template("success_modif.html", logged=session.get("logged_in"))
     # TODO; à modifier, gestion des erreurs
-    return "<p>" + str(r.json) + "<p>"
+    flash("Please check you have a correct ID and try again.")
+    return redirect(url_for("put"))
 
 # DELETE
 @app.route("/delete_contrib", endpoint="delete")
@@ -213,7 +215,8 @@ def delete_contrib():
         print(r.text)
         return render_template("success_delete.html", logged=session.get("logged_in"))
     # TODO; à modifier, gestion des erreurs
-    return "<p>" + str(r.json) + "<p>"
+    flash("Please check your public_id is correct and try again.")
+    return redirect(url_for("delete"))
 
 
 if __name__ == "__main__":

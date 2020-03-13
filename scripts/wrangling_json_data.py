@@ -19,15 +19,18 @@ def write_data(new_data, path):
 
 
 # Ecrit des nouvelles valeurs dans un champ déterminé
-def update_data(category, new_data, path, data_number=None):
+def update_data(category, new_data, path, data_number):
     with open(path, "r") as read_file:
         data = json.load(read_file)
-
-        if data_number is None:
-            for i in data["contributions"]["data"]:
-                i[category] = new_data
-        else:
-            data["contributions"]["data"][data_number][category] = new_data
+        for i in range(len(data["contributions"]["data"])):
+            if data["contributions"]["data"][i]["public_id"] == data_number:
+                data["contributions"]["data"][i][category] = new_data
+                break
+        #if data_number is None:
+        #    for i in data["contributions"]["data"]:
+        #        i[category] = new_data
+        #else:
+        #    data["contributions"]["data"][data_number][category] = new_data
     with open(path, "w") as jsonFile:
         json.dump(data, jsonFile, indent=3)
 
@@ -36,12 +39,19 @@ def update_data(category, new_data, path, data_number=None):
 def delete_data(data_number, path):
     with open(path, "r") as read_file:
         data = json.load(read_file)
+        tracker = False
         for i in range(len(data["contributions"]["data"])):
             if data["contributions"]["data"][i]["public_id"] == data_number:
                 data["contributions"]["data"].pop(i)
+                tracker = True
                 break
-    with open(path, "w") as jsonFile:
-        json.dump(data, jsonFile, indent=3)
+            else:
+                continue
+        if tracker == True:
+            with open(path, "w") as jsonFile:
+                json.dump(data, jsonFile, indent=3)
+        else:
+            raise ValueError("wrong ID")
 
 
 # Chemin relatif vers la BD JSON

@@ -202,7 +202,7 @@ def json_post():
 def json_read():
     data = js.read_data(js.path_all)
     return make_response(jsonify(data), 200)
-    
+
 # GET: l'ajout du nombre x dans l'url permet d'accéder à la contribution numéro x
 @app.route("/api/resource/get/<int:num>", methods=["GET"])
 # @auth.login_required
@@ -271,7 +271,10 @@ def json_delete():
         req = request.get_json()
         if sorted(req.keys()) == sorted(js.required_delete_keys):
             data_number = req["public_id"]
-            js.delete_data(data_number, js.path_all)
+            try:
+                js.delete_data(data_number, js.path_all)
+            except ValueError:
+                return make_response(jsonify({"message": "wrong ID"}),400)
             response_body = {
                 "message": "Data successfully deleted!",
                 "timestamp": datetime.datetime.now(),
