@@ -160,12 +160,6 @@ def json_post():
     if request.is_json:
         req = request.get_json()
         if sorted(list(req.keys())) == sorted(js.required_write_keys):
-            response_body = {
-                "message": "JSON received!",
-                "sender": req.get("user_name"),
-                "timestamp": datetime.datetime.now(),
-                "contrib_name": req.get("contrib_name"),
-            }
             data = {
                 "public_id": str(uuid.uuid4()),
                 "dico_id": "yb_fr_3031",
@@ -179,6 +173,13 @@ def json_post():
                 "ntealan": req["ntealan"],
                 "validate": req["validate"],
                 "last_update": req["last_update"]
+            }
+            response_body = {
+                "message": "JSON received!",
+                "sender": req.get("user_name"),
+                "timestamp": datetime.datetime.now(),
+                "contrib_name": req.get("contrib_name"),
+                "public_id": data["public_id"]
             }
             js.write_data(data, js.path_all)
             res = make_response(jsonify(response_body), 200)
@@ -300,4 +301,4 @@ if __name__ == "__main__":
     # Création de la base de données des utilisateurs si elle n'existe pas
     if not os.path.exists("db.sqlite"):
         db.create_all()
-    app.run(debug=True, host="0.0.0.0", port=8000)
+    app.run(debug=True, host="127.0.0.1", port=8000)
