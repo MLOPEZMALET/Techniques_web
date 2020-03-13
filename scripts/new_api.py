@@ -88,7 +88,7 @@ def before_request():
 
 @app.route("/")
 def index():
-    return "hello. Je marche et ça c'est une bonne nouvelle!"
+    return "hello. Je marche et ca c'est une bonne nouvelle!"
 
 @app.route("/login", methods=["POST"])
 def login_post():

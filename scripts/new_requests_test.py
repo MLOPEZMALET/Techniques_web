@@ -163,7 +163,8 @@ def post_contrib():
     if r.status_code == 200:
         # print(r)
         # print(r.text)
-        return render_template("success_ajout.html", logged=session.get("logged_in"))
+        answer = r.json()
+        return render_template("success_ajout.html", logged=session.get("logged_in"), contrib_ajout_id=answer["public_id"])
     # TODO; à modifier, gestion des erreurs
     flash("Unexpected error. Please try again.")
     return redirect(url_for("post"))
@@ -197,7 +198,8 @@ def put_contrib():
     if r.status_code == 200:
         print(r)
         print(r.text)
-        return render_template("success_modif.html", logged=session.get("logged_in"))
+        answer = r.json()
+        return render_template("success_modif.html", logged=session.get("logged_in"), champ=answer["field"])
     # TODO; à modifier, gestion des erreurs
     else:
         flash("Please check you have a correct ID and try again.")
