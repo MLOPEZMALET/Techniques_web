@@ -3,12 +3,12 @@ import requests
 import os
 from flask import Flask, abort, request, jsonify, g, url_for, Response
 from flask import flash, redirect, render_template, session
+from flask_httpauth import HTTPBasicAuth
 import datetime
 import json
 
 app = Flask(__name__)
 app.config["SECRET_KEY"] = os.urandom(12)
-
 
 @app.route("/", endpoint="idx")
 def index():
@@ -21,23 +21,22 @@ def login():
         return redirect(url_for("profile"))
     return render_template("login.html", logged=session.get("logged_in"))
 
-
 @app.route("/login", methods=["POST"])
 def login_post():
     username = request.form.get("username")
     password = request.form.get("password")
+    
     user = {"username": username, "password": password}
-    r_login = requests.post("http://ceptyconsultant.local:8000/login", data=user)
+    
+    r_login = requests.post("http://ceptyconsultant.local:8000/login", json=user)
+    
     print(r_login.text, r_login.status_code, r_login.json)
     if r_login.status_code == 200:
         # Si l'identifiant et le mot de passe entrés sont corrects
         session["logged_in"] = True
         session["username"] = username
-        print(r_login.text)
-        session['user_id'] = r_login.text
-
+        
         return redirect(url_for("profile"))
-        # return "welcome, "+str(username)+"!"
     else:
         flash("Please check your login details and try again.")
         return redirect(url_for("login"))
@@ -50,10 +49,8 @@ def profile():
         return render_template(
             "profile.html",
             name=session.get("username"),
-            logged=session.get("logged_in"),
-            user_id=session.get('user_id')
+            logged=session.get("logged_in")
         )
-
 
 @app.route("/signup")
 def signup():
@@ -72,11 +69,11 @@ def signup_post():
         return redirect(url_for("signup"))
     else:
         user = {"username": username, "password": password}
-        r_signup = requests.post("http://ceptyconsultant.local:8000/signup", data=user)
-        print(r_signup.text, r_signup.status_code, r_signup.json)
+        r_signup = requests.post("http://ceptyconsultant.local:8000/api/users", json=user)
+        print("TEXT:",r_signup.text, "CODE:", r_signup.status_code, "JSON",r_signup.json)
         if r_signup.status_code == 201:
             return redirect(url_for("login"))
-        elif r_signup.status_code == 226:
+        elif r_signup.status_code == 409:
             flash("Username already exists")
             return redirect(url_for("signup"))
         else:
@@ -108,8 +105,8 @@ def contrib():
         )
     else:
         # TODO: à modifier
+        print("TEXT:",r.text, "CODE:", r.status_code, "JSON",r.json)
         return "PROBLEM"
-
 
 @app.route("/get", methods=["GET"])
 def get():
@@ -131,7 +128,6 @@ def post():
 
 @app.route("/add_contrib", methods=["POST"])
 def post_contrib():
-
     user_name = session.get("username")
     last_update = datetime.datetime.now().strftime('%Y-%m-%dT%H:%M:%S')
     validate = request.form.get("validate")
@@ -142,16 +138,12 @@ def post_contrib():
     ntealan = request.form.get("ntealan")
 
     contrib = {
-        #"article_id": article_id,
         "contrib_data": contrib_data,
         "contrib_name": contrib_name,
         "contrib_path": contrib_path,
         "contrib_type": contrib_type,
-        #"dico_id": dico_id,
         "last_update": last_update,
         "ntealan": ntealan,
-        #"public_id": public_id,
-        #"user_id": user_id,
         "user_name": user_name,
         "validate": validate,
     }
@@ -159,9 +151,11 @@ def post_contrib():
         "http://ceptyconsultant.local:8000/api/resource/add_contrib", json=contrib
     )
     print(r.status_code)
-    response = r.json()
+    print(r.text)
     if r.status_code == 200:
-        return render_template("success_ajout.html", logged=session.get("logged_in"))
+        print(r)
+        print(r.text)
+        return "Done!"
     # TODO; à modifier, gestion des erreurs
     return "not done"
 
@@ -182,9 +176,9 @@ def put_contrib():
     field = request.form.get("change_input")
     number = request.form.get("change_id")
     new_data = request.form.get("change_modif")
-
+    
     contrib = {"field": field, "data_number": number, "new_data": new_data}
-
+    
     r = requests.put(
         "http://ceptyconsultant.local:8000/api/resource/update_contrib", json=contrib
     )

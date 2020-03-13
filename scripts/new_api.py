@@ -86,92 +86,50 @@ def before_request():
     app.permanent_session_lifetime = datetime.timedelta(minutes=5)
     session.modified = True  # réinitialise le temps
 
-
 @app.route("/")
 def index():
     return "hello. Je marche et ça c'est une bonne nouvelle!"
 
-
 @app.route("/login", methods=["POST"])
 def login_post():
-    username = request.form.get("username")
-    password = request.form.get("password")
+    if request.is_json:
+        req = request.get_json()
+        username = req.get("username")
+        password = req.get("password")
+        user = User.query.filter_by(username=username).first()
 
-    user = User.query.filter_by(username=username).first()
+        # Retourne une erreur si l'utilisateur n'existe pas ou si le mot de passe ne correspond pas
+        if not user or not verify_password(username, password):
+            return make_response("authentication error", 401)
 
-    # Rafraichit la page si l'utilisateur n'existe pas ou si le mot de passe ne correspond pas
-    if not user or not verify_password(username, password):
-        return make_response("authentication error", 401)
-
-    # Si l'identifiant et le mot de passe entrés sont correct
-    session["logged_in"] = True
-    session["username"] = username
-    session['user_id'] = user.uid
-    return (make_response(user.uid, 200))
-
-
-@app.route("/signup", methods=["POST"])
-def signup_post():
-    # Ajout d'un utilisateur dans la base de données
-    username = request.form.get("username")
-    password = request.form.get("password")
-    req = request.get_json()
-    if username == "" or password == "":
-        # Si un champ est vide
-        return make_response("No content", 204)
-    if User.query.filter_by(username=username).first() is not None:
-        # Si l'utilisateur existe déjà dans la base de données
-        return make_response("conflict: user already used", 409)
-    user = User(username=username, uid=str(uuid.uuid4()))
-    user.hash_password(password)
-    db.session.add(user)
-    db.session.commit()
-    return make_response("ok", 201)
-
-"""POSE PB: unit trop étroitement front et back end
-@app.route('/logout')
-# @auth.login_required
-def logout():
-    # Déconnexion de l'utilisateur
-    if not session.get('logged_in'):
-        return redirect(url_for('login'))
-    session.pop('username', None)
-    session['logged_in'] = False
-    return redirect(url_for('index'))
-
-"""
-
-# Page des contributions
-@app.route("/contributions", methods=["GET"])
-# @auth.login_required
-def contrib():
-    if not session.get("logged_in"):
-        return make_response("you must log in ", 401)
-    data = js.read_data(js.path_all)
-    return make_response("ok", 200)
-
+        # Si l'identifiant et le mot de passe entrés sont correct
+        return (make_response("Successful authentication", 200))
+    else:
+        return make_response(jsonify({"message": "Request body must be JSON"}), 400)
 
 """ Partie pour l'API """
-
 @app.route("/api/users", methods=["POST"])
 def new_user():
     # Ajout d'un nouvel utilisateur
-    username = request.json.get("username")
-    password = request.json.get("password")
-    if username is None or password is None:
-        abort(400)  # champ manquant
-    if User.query.filter_by(username=username).first() is not None:
-        abort(400)  # utilisateur existant déjà
-    user = User(username=username, uid=str(uuid.uuid4()))
-    user.hash_password(password)
-    db.session.add(user)
-    db.session.commit()
-    return (
-        jsonify({"username": user.username}),
-        201,
-        {"Location": url_for("get_user", id=user.id, _external=True)},
-    )
-
+    if request.is_json:
+        req = request.get_json()
+        username = req.get("username")
+        password = req.get("password")
+        if username == "" or password == "":
+            return make_response(jsonify({"message":"Password or username missing"}), 400) # Si un champ est vide
+        if User.query.filter_by(username=username).first() is not None:
+            return make_response(jsonify({"message":"Username already exists"}), 409)  # utilisateur existant déjà
+        user = User(username=username, uid=str(uuid.uuid4()))
+        user.hash_password(password)
+        db.session.add(user)
+        db.session.commit()
+        return (
+            jsonify({"message":"user successfully created","username": user.username}),
+            201,
+            {"Location": url_for("get_user", id=user.id, _external=True)}
+        )
+    else:
+        return make_response(jsonify({"message": "Request body must be JSON"}), 400)
 
 @app.route("/api/users/<int:id>")
 def get_user(id):
@@ -181,7 +139,6 @@ def get_user(id):
         abort(400)
     return jsonify({"username": user.username})
 
-
 @app.route("/api/token")
 # @auth.login_required
 def get_auth_token():
@@ -189,13 +146,11 @@ def get_auth_token():
     token = g.user.generate_auth_token(600)
     return jsonify({"token": token.decode("ascii"), "duration": 600})
 
-
 @app.route("/api/resource")
 # @auth.login_required
 def get_resource():
     # Renvoie un message de salutation à l'utilisateur
     return jsonify({"data": "Hello, %s!" % g.user.username})
-
 
 # POST: Permet d'ajouter une contribution à la BD
 @app.route("/api/resource/add_contrib", methods=["POST"])
@@ -225,7 +180,7 @@ def json_post():
                 "validate": req["validate"],
                 "last_update": req["last_update"]
             }
-            js.write_data(req, js.path_all)
+            js.write_data(data, js.path_all)
             res = make_response(jsonify(response_body), 200)
             return res
         else:
@@ -241,15 +196,13 @@ def json_post():
     else:
         return make_response(jsonify({"message": "Request body must be JSON"}), 400)
 
-
 # GET: Permet de parser le fichier JSON pour consulter des données (ici, toutes)
 @app.route("/api/resource/get", methods=["GET"])
 # @auth.login_required
 def json_read():
     data = js.read_data(js.path_all)
     return make_response(jsonify(data), 200)
-
-
+    
 # GET: l'ajout du nombre x dans l'url permet d'accéder à la contribution numéro x
 @app.route("/api/resource/get/<int:num>", methods=["GET"])
 # @auth.login_required
@@ -257,7 +210,6 @@ def json_read_num(num):
     data = js.read_data(js.path_all)
     data = data[num]
     return make_response(jsonify(data), 200)
-
 
 # GET: l'ajout du champ y dans l'url permet d'accéder à ce champ dans toutes les contributions
 @app.route("/api/resource/get/<string:field>", methods=["GET"])
@@ -269,7 +221,6 @@ def json_read_field(field):
         fields.append(i[field])
     return make_response(jsonify(fields), 200)
 
-
 # GET: l'ajout du nombre x + champ y dans l'url permet d'accéder au champ y de la contribution x
 @app.route("/api/resource/get/<int:num>/<string:field>", methods=["GET"])
 # @auth.login_required
@@ -277,7 +228,6 @@ def json_read_num_field(num, field):
     data = js.read_data(js.path_all)
     data = data[num][field]
     return make_response(jsonify(data), 200)
-
 
 # PUT: Modifie la valeur d'un champ dans une contribution donnée. Si aucun numéro de contribution n'est indiqué, le champ sera modifié dans toutes les contributions
 @app.route("/api/resource/update_contrib", methods=["PUT"])
@@ -347,4 +297,4 @@ if __name__ == "__main__":
     # Création de la base de données des utilisateurs si elle n'existe pas
     if not os.path.exists("db.sqlite"):
         db.create_all()
-    app.run(debug=True, host="0.0.0.0", port=5000)
+    app.run(debug=True, host="0.0.0.0", port=8000)
