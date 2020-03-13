@@ -16,8 +16,20 @@
 	<form method='POST' action="/update_contrib">
 		<div class="field">
                 <div class="control">
-					<label> Entrez ici le champ que vous voulez modifier</label>
-                    <input class="input is-large" type="text" name="change_input"  autofocus="">
+					<!-- <label> Entrez ici le champ que vous voulez modifier</label> -->
+					<!-- <input class="input is-large" type="text" name="change_input"  autofocus=""> -->
+					<label> Sélectionnez le champ que vous voulez modifier</label>
+					</br>
+					<select name="change_input"></br>
+						<option value="user_name">user_name</option>
+						<option value="contrib_type">contrib_type</option>
+						<option value="contrib_data">contrib_data</option>
+						<option value="contrib_path">contrib_path</option>
+						<option value="contrib_name">contrib_name</option>
+						<option value="ntealan">ntealan</option>
+						<option value="validate">validate</option>
+					</select>
+					</br>
 					<label> Entrez ici le numéro de la contribution concernée </label>
                     <input class="input is-large" type="text" name="change_id"  autofocus="">
 					<label> Entrez ici la modification</label>
