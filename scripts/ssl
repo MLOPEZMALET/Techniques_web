@@ -1,0 +1,23 @@
+#!/bin/bash
+
+
+sudo mkdir /etc/nginx/logs/
+sudo mkdir /etc/nginx/logs/ceptyconsultant.local
+
+sudo mv conf/ssl/private/cepty_back.key /etc/ssl/private/
+sudo mv conf/ssl/private/cepty_front.key /etc/ssl/private/
+sudo mv conf/ssl/certs/cepty_back.crt /etc/ssl/certs/
+sudo mv conf/ssl/certs/cepty_front.crt /etc/ssl/certs/
+
+sudo mv conf/dhparam.pem /etc/nginx/
+
+sudo mv conf/snippets/selfsigned_front.conf /etc/nginx/snippets/
+sudo mv conf/snippets/selfsigned_back.conf /etc/nginx/snippets/
+sudo mv ssl-params.conf /etc/nginx/snippets/
+
+sudo mv conf/cepty_back.conf /etc/nginx/sites-available/ 
+sudo mv conf/cepty_front.conf /etc/nginx/sites-available/ 
+
+ln -s /etc/nginx/sites-available/cepty_back.conf /etc/nginx/sites-enabled/
+ln -s /etc/nginx/sites-available/cepty_front.conf /etc/nginx/sites-enabled/
+
