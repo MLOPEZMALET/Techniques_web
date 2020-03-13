@@ -96,7 +96,7 @@ def logout():
     return redirect(url_for("idx"))
 
 
-# GET
+# GET (toutes contributions)
 @app.route("/contributions", endpoint="contrib", methods=["GET"])
 # @auth.login_required
 def contrib():
@@ -115,15 +115,34 @@ def contrib():
         return "PROBLEM"
 
 
-@app.route("/get", methods=["GET"])
-def get():
-    r = requests.get("http://ceptyconsultant.local:8000/api/resource/get")
+# GET (matching)
+@app.route("/match_contrib", endpoint="match")
+def match():
+    if session.get("logged_in"):
+        return render_template("match.html", logged=session.get("logged_in"))
+    return redirect(url_for("login"))
+
+
+@app.route("/match_contrib", methods=["POST"])
+# @auth.login_required
+def match_contrib():
+    field = request.form.get("champ")
+    value = request.form.get("valeur")
+    contrib = {"field": field, "value": value}
+    r = requests.post("http://ceptyconsultant.local:8000/api/resource/match_contrib", json=contrib)
     if r.status_code == 200:
         print(r)
+        print(r.status_code)
+        answer = r.json()
+        return render_template(
+            "contrib.html", logged=session.get("logged_in"), params=answer
+        )
+    else:
+        print(r)
+        print(r.status_code)
         print(r.text)
-        return "Done!"
-    # TODO; à modifier, gestion des erreurs
-    return "<p>" + str(r.json) + "<p>"
+        flash("Unexpected error. Please try again.")
+        return redirect(url_for("match"))
 
 
 # POST

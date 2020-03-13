@@ -230,6 +230,25 @@ def json_read_num_field(num, field):
     data = data[num][field]
     return make_response(jsonify(data), 200)
 
+
+@app.route("/api/resource/match_contrib", methods=["POST"])
+# @auth.login_required
+def json_match():
+    if request.is_json:
+        req = request.get_json()
+        field = req["field"]
+        value = req["value"]
+        data = js.match_data(field, value, js.path_all)
+        if data is None:
+            return make_response(
+                jsonify({"message": "No matching data"}),400)
+        else:
+            res = make_response(jsonify(data), 200)
+        return res
+    else:
+        return make_response(jsonify({"message": "Request body must be JSON"}), 400)
+
+
 # PUT: Modifie la valeur d'un champ dans une contribution donnée. Si aucun numéro de contribution n'est indiqué, le champ sera modifié dans toutes les contributions
 @app.route("/api/resource/update_contrib", methods=["PUT"])
 # @auth.login_required
