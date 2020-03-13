@@ -1,5 +1,14 @@
 #!/bin/bash
 
+sudo mkdir /var/ceptyconsultant
+sudo mkdir /var/ceptyconsultant/
+
+# SUPERVISOR
+sudo mv conf/supervisor/api.conf /etc/supervisor/conf.d/
+sudo mv conf/supervisor/app_front.conf /etc/supervisor/conf.d/
+
+
+# NGINX
 sudo mv conf/ssl/private/cepty_back.key /etc/ssl/private/
 sudo mv conf/ssl/private/cepty_front.key /etc/ssl/private/
 sudo mv conf/ssl/certs/cepty_back.crt /etc/ssl/certs/
