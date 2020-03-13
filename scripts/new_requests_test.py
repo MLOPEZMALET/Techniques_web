@@ -3,47 +3,48 @@ import requests
 import os
 from flask import Flask, abort, request, jsonify, g, url_for, Response
 from flask import flash, redirect, render_template, session
-
 import datetime
-import json
 
+# Initialisation de l'application
 app = Flask(__name__)
 app.config["SECRET_KEY"] = os.urandom(12)
 
-
+# Page d'accueil
 @app.route("/", endpoint="idx")
 def index():
     return render_template("index.html", logged=session.get("logged_in"))
 
-# Page d'authentification qui apparait aux personnes non connectees
+
+""" GESTION DE LA SESSION UTILISATEUR """
+
+# Page d'authentification qui apparaît aux personnes non connectées
 @app.route("/login", endpoint="login")
 def login():
     if session.get("logged_in"):
         return redirect(url_for("profile"))
     return render_template("login.html", logged=session.get("logged_in"))
 
-
+# Envoi des données utilisateur pour l'authentification
 @app.route("/login", methods=["POST"])
 def login_post():
     username = request.form.get("username")
     password = request.form.get("password")
 
     user = {"username": username, "password": password}
-
     r_login = requests.post("http://ceptyconsultant.local:8000/login", json=user)
 
-    print(r_login.text, r_login.status_code, r_login.json)
+    # print(r_login.text, r_login.status_code, r_login.json)
     if r_login.status_code == 200:
         # Si l'identifiant et le mot de passe entrés sont corrects
         session["logged_in"] = True
         session["username"] = username
-
         return redirect(url_for("profile"))
     else:
+        # Si les identifiants sont erronés
         flash("Please check your login details and try again.")
         return redirect(url_for("login"))
 
-
+# Page d'accueil personnalisée après authentification
 @app.route("/profile", endpoint="profile")
 def profile():
     if not session.get("logged_in"):
@@ -52,10 +53,10 @@ def profile():
         return render_template(
             "profile.html",
             name=session.get("username"),
-            logged=session.get("logged_in")
+            logged=session.get("logged_in"),
         )
 
-
+# Ajout d'un nouvel utilisateur dans la BD
 @app.route("/signup")
 def signup():
     if session.get("logged_in"):
@@ -74,8 +75,12 @@ def signup_post():
         return redirect(url_for("signup"))
     else:
         user = {"username": username, "password": password}
-        r_signup = requests.post("http://ceptyconsultant.local:8000/api/users", json=user)
-        print("TEXT:",r_signup.text, "CODE:", r_signup.status_code, "JSON",r_signup.json)
+        r_signup = requests.post(
+            "http://ceptyconsultant.local:8000/api/users", json=user
+        )
+        print(
+            "TEXT:", r_signup.text, "CODE:", r_signup.status_code, "JSON", r_signup.json
+        )
         if r_signup.status_code == 201:
             return redirect(url_for("login"))
         elif r_signup.status_code == 409:
@@ -84,7 +89,7 @@ def signup_post():
         else:
             return "Let's debug!"
 
-
+# Sortie de la session de l'utilisateur
 @app.route("/logout")
 # @auth.login_required
 def logout():
@@ -96,6 +101,8 @@ def logout():
     return redirect(url_for("idx"))
 
 
+""" MANIPULATION DES DONNÉES """
+
 # GET (toutes contributions)
 @app.route("/contributions", endpoint="contrib", methods=["GET"])
 # @auth.login_required
@@ -104,18 +111,18 @@ def contrib():
         return redirect(url_for("login"))
     r = requests.get("http://ceptyconsultant.local:8000/api/resource/get")
     if r.status_code == 200:
-        print(r)
-        print(r.status_code)
+        #print(r)
+        #print(r.status_code)
         return render_template(
             "contrib.html", logged=session.get("logged_in"), params=r.json()
         )
     else:
         # TODO: à modifier
-        print("TEXT:",r.text, "CODE:", r.status_code, "JSON",r.json)
-        return "PROBLEM"
+        print("TEXT:", r.text, "CODE:", r.status_code, "JSON", r.json)
+        return "Oups! Il y a eu un problème. Est-ce que vous avez lancé l'API Cepty Consultant?"
 
 
-# GET (matching)
+# GET (requête par matching)
 @app.route("/match_contrib", endpoint="match")
 def match():
     if session.get("logged_in"):
@@ -129,23 +136,25 @@ def match_contrib():
     field = request.form.get("champ")
     value = request.form.get("valeur")
     contrib = {"field": field, "value": value}
-    r = requests.post("http://ceptyconsultant.local:8000/api/resource/match_contrib", json=contrib)
+    r = requests.post(
+        "http://ceptyconsultant.local:8000/api/resource/match_contrib", json=contrib
+    )
     if r.status_code == 200:
-        print(r)
-        print(r.status_code)
+        #print(r)
+        #print(r.status_code)
         answer = r.json()
         return render_template(
             "contrib.html", logged=session.get("logged_in"), params=answer
         )
     else:
-        print(r)
-        print(r.status_code)
-        print(r.text)
+        #print(r)
+        #print(r.status_code)
+        #print(r.text)
         flash("No matching data. Please try again.")
         return redirect(url_for("match"))
 
 
-# POST
+# POST: ajout de contribution
 @app.route("/add_contrib", endpoint="post")
 def post():
     if session.get("logged_in"):
@@ -156,7 +165,7 @@ def post():
 @app.route("/add_contrib", methods=["POST"])
 def post_contrib():
     user_name = session.get("username")
-    last_update = datetime.datetime.now().strftime('%Y-%m-%dT%H:%M:%S')
+    last_update = datetime.datetime.now().strftime("%Y-%m-%dT%H:%M:%S")
     validate = request.form.get("validate")
     contrib_type = request.form.get("contrib_type")
     contrib_data = request.form.get("contrib_data")
@@ -177,21 +186,23 @@ def post_contrib():
     r = requests.post(
         "http://ceptyconsultant.local:8000/api/resource/add_contrib", json=contrib
     )
-    print(r.status_code)
+    #print(r.status_code)
     # print(r.text)
     if r.status_code == 200:
         # print(r)
         # print(r.text)
         answer = r.json()
-        return render_template("success_ajout.html", logged=session.get("logged_in"), contrib_ajout_id=answer["public_id"])
+        return render_template(
+            "success_ajout.html",
+            logged=session.get("logged_in"),
+            contrib_ajout_id=answer["public_id"],
+        )
     # TODO; à modifier, gestion des erreurs
     flash("Unexpected error. Please try again.")
     return redirect(url_for("post"))
 
 
-# PUT
-
-
+# PUT: modification de contribution
 @app.route("/update_contrib", endpoint="put")
 def put():
     if session.get("logged_in"):
@@ -212,17 +223,20 @@ def put_contrib():
     r = requests.put(
         "http://ceptyconsultant.local:8000/api/resource/update_contrib", json=contrib
     )
-    print(r.status_code)
-    print(r.text)
+    #print(r.status_code)
+    #print(r.text)
     if r.status_code == 200:
-        print(r)
-        print(r.text)
+        #print(r)
+        #print(r.text)
         answer = r.json()
-        return render_template("success_modif.html", logged=session.get("logged_in"), champ=answer["field"])
+        return render_template(
+            "success_modif.html", logged=session.get("logged_in"), champ=answer["field"]
+        )
     # TODO; à modifier, gestion des erreurs
     else:
         flash("Please check you have a correct ID and try again.")
         return redirect(url_for("put"))
+
 
 # DELETE
 @app.route("/delete_contrib", endpoint="delete")
@@ -240,11 +254,11 @@ def delete_contrib():
     r = requests.delete(
         "http://ceptyconsultant.local:8000/api/resource/delete_contrib", json=contrib
     )
-    print(r.status_code)
-    print(r.text)
+    #print(r.status_code)
+    #print(r.text)
     if r.status_code == 200:
-        print(r)
-        print(r.text)
+        #print(r)
+        #print(r.text)
         return render_template("success_delete.html", logged=session.get("logged_in"))
     # TODO; à modifier, gestion des erreurs
     else:

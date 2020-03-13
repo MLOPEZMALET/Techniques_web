@@ -38,7 +38,6 @@ def update_data(category, new_data, path, data_number):
             raise ValueError("wrong ID")
 
 
-
 # Supprime une contribution de Data
 def delete_data(data_number, path):
     with open(path, "r") as read_file:
@@ -51,12 +50,14 @@ def delete_data(data_number, path):
                 break
             else:
                 continue
-        if tracker == True:
+        if tracker:
             with open(path, "w") as jsonFile:
                 json.dump(data, jsonFile, indent=3)
         else:
             raise ValueError("wrong ID")
 
+
+# Renvoie les données dont le champ contient une valeur donnée par l'utilisateur
 def match_data(field, value, path):
     with open(path, "r") as read_file:
         data = json.load(read_file)
@@ -69,7 +70,7 @@ def match_data(field, value, path):
                 tracker = True
             else:
                 continue
-        if tracker == True:
+        if tracker:
             return res
         else:
             return None
@@ -78,8 +79,16 @@ def match_data(field, value, path):
 # Chemin relatif vers la BD JSON
 path_all = "../data/DONNEES_CLIENT.json"
 # Liste des clés nécessaires au bon formatage des données JSON
-required_write_keys = ['user_name', 'contrib_type', 'contrib_data', 'contrib_path', 'contrib_name', 'ntealan', 'validate', 'last_update']
-# other 'public_id', , 'user_id', 'article_id',
+required_write_keys = [
+    "user_name",
+    "contrib_type",
+    "contrib_data",
+    "contrib_path",
+    "contrib_name",
+    "ntealan",
+    "validate",
+    "last_update",
+]
 required_update_keys = ["field", "data_number", "new_data"]
 required_delete_keys = ["public_id"]
 
@@ -87,27 +96,27 @@ required_delete_keys = ["public_id"]
 
 # ____TEST_READING
 
-#db = read_data(path_all)
+# db = read_data(path_all)
 
-#sample = db[0]
-#print(db[0])
-#print(db[-1])
+# sample = db[0]
+# print(db[0])
+# print(db[-1])
 
 
 # ___TEST_WRITING
 
-#write_data(sample, path_all)
+# write_data(sample, path_all)
 
-#db_1 = read_data(path_all)
-#print(db_1[-1])
+# db_1 = read_data(path_all)
+# print(db_1[-1])
 # ___TEST_UPDATING
 
 # update_data("user_name", "BARGIER", path_all, "885980e9-d559-4b9c-8878-4d63aed4cebb")
 
-#__TEST_DELETING____
+# __TEST_DELETING____
 
 # delete_data("8ad93a62-9437-416f-93c6-948a2c15b45b", path_all)
 
-#__TEST MATCHING__
+# __TEST MATCHING__
 
 match_data("user_name", "lko", path_all)
