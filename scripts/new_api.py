@@ -1,7 +1,5 @@
 import os
 import datetime
-from datetime import timedelta
-from http import HTTPStatus
 import uuid
 from flask import Flask, abort, request, jsonify, g, url_for, Response
 from flask import make_response, flash, redirect, render_template, session
@@ -15,8 +13,9 @@ from itsdangerous import (
     BadSignature,
     SignatureExpired,
 )  # token
-
 import wrangling_json_data as js
+
+""" INITIALISATION """
 
 # Constructeur de l'API / initialisation
 app = Flask(__name__)
@@ -30,6 +29,9 @@ app.config["SQLALCHEMY_COMMIT_ON_TEARDOWN"] = True
 # Extensions
 db = SQLAlchemy(app)
 auth = HTTPBasicAuth()
+
+
+""" AUTHENTIFICATION ET GESTION DES UTILISATEURS """
 
 # Base de données des utilisateurs
 class User(db.Model):
@@ -79,6 +81,8 @@ def verify_password(username_or_token, password):
     g.user = user
     return True
 
+
+# Fermeture automatique de la session
 @app.before_request
 def before_request():
     # Déconnexion automatique après 5 minutes d'inactivité
@@ -86,10 +90,14 @@ def before_request():
     app.permanent_session_lifetime = datetime.timedelta(minutes=5)
     session.modified = True  # réinitialise le temps
 
+
+# Page d'accueil, racine de l'API
 @app.route("/")
 def index():
-    return "hello. Je marche et ca c'est une bonne nouvelle!"
+    return "Cepty Consultant's API is working."
 
+
+# Authentification de l'utilisateur
 @app.route("/login", methods=["POST"])
 def login_post():
     if request.is_json:
@@ -98,38 +106,46 @@ def login_post():
         password = req.get("password")
         user = User.query.filter_by(username=username).first()
 
-        # Retourne une erreur si l'utilisateur n'existe pas ou si le mot de passe ne correspond pas
+        # Retourne une erreur si l'utilisateur n'existe pas ou si le mot de passe n'est pas le bon
         if not user or not verify_password(username, password):
             return make_response("authentication error", 401)
 
-        # Si l'identifiant et le mot de passe entrés sont correct
-        return (make_response("Successful authentication", 200))
+        # Si l'identifiant et le mot de passe entrés sont corrects
+        return make_response("Successful authentication", 200)
     else:
         return make_response(jsonify({"message": "Request body must be JSON"}), 400)
 
-""" Partie pour l'API """
+
+# Ajout d'un nouvel utilisateur
 @app.route("/api/users", methods=["POST"])
 def new_user():
-    # Ajout d'un nouvel utilisateur
+    # vérification du format de la requête
     if request.is_json:
         req = request.get_json()
         username = req.get("username")
         password = req.get("password")
         if username == "" or password == "":
-            return make_response(jsonify({"message":"Password or username missing"}), 400) # Si un champ est vide
+            return make_response(
+                jsonify({"message": "Password or username missing"}), 400
+            )  # Si un champ est vide
         if User.query.filter_by(username=username).first() is not None:
-            return make_response(jsonify({"message":"Username already exists"}), 409)  # utilisateur existant déjà
+            return make_response(
+                jsonify({"message": "Username already exists"}), 409
+            )  # utilisateur existant déjà
         user = User(username=username, uid=str(uuid.uuid4()))
         user.hash_password(password)
         db.session.add(user)
         db.session.commit()
         return (
-            jsonify({"message":"user successfully created","username": user.username}),
+            jsonify(
+                {"message": "user successfully created", "username": user.username}
+            ),
             201,
-            {"Location": url_for("get_user", id=user.id, _external=True)}
+            {"Location": url_for("get_user", id=user.id, _external=True)},
         )
     else:
-        return make_response(jsonify({"message": "Request body must be JSON"}), 400)
+        return make_response(jsonify({"message": "Request body must be JSON"}), 400) #si la requête n'est pas en JSON
+
 
 @app.route("/api/users/<int:id>")
 def get_user(id):
@@ -139,6 +155,7 @@ def get_user(id):
         abort(400)
     return jsonify({"username": user.username})
 
+
 @app.route("/api/token")
 # @auth.login_required
 def get_auth_token():
@@ -146,11 +163,54 @@ def get_auth_token():
     token = g.user.generate_auth_token(600)
     return jsonify({"token": token.decode("ascii"), "duration": 600})
 
+
 @app.route("/api/resource")
 # @auth.login_required
 def get_resource():
     # Renvoie un message de salutation à l'utilisateur
     return jsonify({"data": "Hello, %s!" % g.user.username})
+
+
+""" EXPLORATION DES DONNÉES AVEC L'URL DE L'API """
+
+# GET: Permet de parser le fichier JSON pour consulter des données (ici, toutes)
+@app.route("/api/resource/get", methods=["GET"])
+# @auth.login_required
+def json_read():
+    data = js.read_data(js.path_all)
+    return make_response(jsonify(data), 200)
+
+
+# GET: l'ajout du nombre x dans l'url permet d'accéder à la contribution numéro x
+@app.route("/api/resource/get/<int:num>", methods=["GET"])
+# @auth.login_required
+def json_read_num(num):
+    data = js.read_data(js.path_all)
+    data = data[num]
+    return make_response(jsonify(data), 200)
+
+
+# GET: l'ajout du champ y dans l'url permet d'accéder à ce champ dans toutes les contributions
+@app.route("/api/resource/get/<string:field>", methods=["GET"])
+# @auth.login_required
+def json_read_field(field):
+    data = js.read_data(js.path_all)
+    fields = []
+    for i in data:
+        fields.append(i[field])
+    return make_response(jsonify(fields), 200)
+
+
+# GET: l'ajout du nombre x + champ y dans l'url permet d'accéder au champ y de la contribution x
+@app.route("/api/resource/get/<int:num>/<string:field>", methods=["GET"])
+# @auth.login_required
+def json_read_num_field(num, field):
+    data = js.read_data(js.path_all)
+    data = data[num][field]
+    return make_response(jsonify(data), 200)
+
+
+""" REQUÊTES HTTP """
 
 # POST: Permet d'ajouter une contribution à la BD
 @app.route("/api/resource/add_contrib", methods=["POST"])
@@ -172,14 +232,14 @@ def json_post():
                 "contrib_name": req["contrib_name"],
                 "ntealan": req["ntealan"],
                 "validate": req["validate"],
-                "last_update": req["last_update"]
+                "last_update": req["last_update"],
             }
             response_body = {
                 "message": "JSON received!",
                 "sender": req.get("user_name"),
                 "timestamp": datetime.datetime.now(),
                 "contrib_name": req.get("contrib_name"),
-                "public_id": data["public_id"]
+                "public_id": data["public_id"],
             }
             js.write_data(data, js.path_all)
             res = make_response(jsonify(response_body), 200)
@@ -192,45 +252,13 @@ def json_post():
                         + str(js.required_keys)
                     }
                 ),
-                400,
+                400, #absence de clés
             )
     else:
-        return make_response(jsonify({"message": "Request body must be JSON"}), 400)
-
-# GET: Permet de parser le fichier JSON pour consulter des données (ici, toutes)
-@app.route("/api/resource/get", methods=["GET"])
-# @auth.login_required
-def json_read():
-    data = js.read_data(js.path_all)
-    return make_response(jsonify(data), 200)
-
-# GET: l'ajout du nombre x dans l'url permet d'accéder à la contribution numéro x
-@app.route("/api/resource/get/<int:num>", methods=["GET"])
-# @auth.login_required
-def json_read_num(num):
-    data = js.read_data(js.path_all)
-    data = data[num]
-    return make_response(jsonify(data), 200)
-
-# GET: l'ajout du champ y dans l'url permet d'accéder à ce champ dans toutes les contributions
-@app.route("/api/resource/get/<string:field>", methods=["GET"])
-# @auth.login_required
-def json_read_field(field):
-    data = js.read_data(js.path_all)
-    fields = []
-    for i in data:
-        fields.append(i[field])
-    return make_response(jsonify(fields), 200)
-
-# GET: l'ajout du nombre x + champ y dans l'url permet d'accéder au champ y de la contribution x
-@app.route("/api/resource/get/<int:num>/<string:field>", methods=["GET"])
-# @auth.login_required
-def json_read_num_field(num, field):
-    data = js.read_data(js.path_all)
-    data = data[num][field]
-    return make_response(jsonify(data), 200)
+        return make_response(jsonify({"message": "Request body must be JSON"}), 400)  # problème de format
 
 
+# GET: recherche par matching
 @app.route("/api/resource/match_contrib", methods=["POST"])
 # @auth.login_required
 def json_match():
@@ -240,16 +268,15 @@ def json_match():
         value = req["value"]
         data = js.match_data(field, value, js.path_all)
         if data is None:
-            return make_response(
-                jsonify({"message": "No matching data"}),400)
+            return make_response(jsonify({"message": "No matching data"}), 400)  # pas de données correspondantes
         else:
             res = make_response(jsonify(data), 200)
         return res
     else:
-        return make_response(jsonify({"message": "Request body must be JSON"}), 400)
+        return make_response(jsonify({"message": "Request body must be JSON"}), 400)  # problème de format
 
 
-# PUT: Modifie la valeur d'un champ dans une contribution donnée. Si aucun numéro de contribution n'est indiqué, le champ sera modifié dans toutes les contributions
+# PUT: Modifie la valeur d'un champ dans une contribution donnée.
 @app.route("/api/resource/update_contrib", methods=["PUT"])
 # @auth.login_required
 def json_updated():
@@ -277,13 +304,13 @@ def json_updated():
                         + str(js.required_update_keys)
                     }
                 ),
-                400,
+                400,  # absence de clés nécessaires dans le corps de la requête
             )
     else:
-        return make_response(jsonify({"message": "Request body must be JSON"}), 400)
+        return make_response(jsonify({"message": "Request body must be JSON"}), 400)  # problème de format
 
 
-# DELETE: efface la contribution numéro x (x donné dans la requête)
+# DELETE: efface la contribution à partir de son public_id
 @app.route("/api/resource/delete_contrib", methods=["DELETE"])
 # @auth.login_required
 def json_delete():
@@ -294,7 +321,7 @@ def json_delete():
             try:
                 js.delete_data(data_number, js.path_all)
             except ValueError:
-                return make_response(jsonify({"message": "wrong ID"}),400)
+                return make_response(jsonify({"message": "wrong ID"}), 400)
             response_body = {
                 "message": "Data successfully deleted!",
                 "timestamp": datetime.datetime.now(),
@@ -311,9 +338,9 @@ def json_delete():
                     }
                 ),
                 400,
-            )
+            )  # il manque des clés dans le corps de la requête
     else:
-        return make_response(jsonify({"message": "Request body must be JSON"}), 400)
+        return make_response(jsonify({"message": "Request body must be JSON"}), 400)  # problème de format
 
 
 if __name__ == "__main__":
