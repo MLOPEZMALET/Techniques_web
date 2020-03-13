@@ -211,6 +211,20 @@ def json_post():
                 "timestamp": datetime.datetime.now(),
                 "contrib_name": req.get("contrib_name"),
             }
+            data = {
+                "public_id": str(uuid.uuid4()),
+                "dico_id": "yb_fr_3031",
+                "user_id": User.query.get("uid"),
+                "user_name": req["user_name"],
+                "article_id": str(uuid.uuid4()),
+                "contrib_type": req["contrib_type"],
+                "contrib_data": req["contrib_data"],
+                "contrib_path": req["contrib_path"],
+                "contrib_name": req["contrib_name"],
+                "ntealan": req["ntealan"],
+                "validate": req["validate"],
+                "last_update": req["last_update"]
+            }
             js.write_data(req, js.path_all)
             res = make_response(jsonify(response_body), 200)
             return res
@@ -333,4 +347,4 @@ if __name__ == "__main__":
     # Création de la base de données des utilisateurs si elle n'existe pas
     if not os.path.exists("db.sqlite"):
         db.create_all()
-    app.run(debug=True, host="0.0.0.0", port=8000)
+    app.run(debug=True, host="0.0.0.0", port=5000)

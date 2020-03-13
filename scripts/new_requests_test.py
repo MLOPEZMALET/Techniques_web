@@ -35,7 +35,7 @@ def login_post():
         session["username"] = username
         print(r_login.text)
         session['user_id'] = r_login.text
-        
+
         return redirect(url_for("profile"))
         # return "welcome, "+str(username)+"!"
     else:
@@ -131,30 +131,27 @@ def post():
 
 @app.route("/add_contrib", methods=["POST"])
 def post_contrib():
-    user_id = session.get("user_id")
-    article_id = request.form.get("article_id")
+
     user_name = session.get("username")
     last_update = datetime.datetime.now().strftime('%Y-%m-%dT%H:%M:%S')
     validate = request.form.get("validate")
     contrib_type = request.form.get("contrib_type")
-    dico_id = request.form.get("dico_id")
     contrib_data = request.form.get("contrib_data")
     contrib_path = request.form.get("contrib_path")
     contrib_name = request.form.get("contrib_name")
-    public_id = request.form.get("public_id")
     ntealan = request.form.get("ntealan")
 
     contrib = {
-        "article_id": article_id,
+        #"article_id": article_id,
         "contrib_data": contrib_data,
         "contrib_name": contrib_name,
         "contrib_path": contrib_path,
         "contrib_type": contrib_type,
-        "dico_id": dico_id,
+        #"dico_id": dico_id,
         "last_update": last_update,
         "ntealan": ntealan,
-        "public_id": public_id,
-        "user_id": user_id,
+        #"public_id": public_id,
+        #"user_id": user_id,
         "user_name": user_name,
         "validate": validate,
     }
@@ -187,9 +184,9 @@ def put_contrib():
     field = request.form.get("change_input")
     number = request.form.get("change_id")
     new_data = request.form.get("change_modif")
-    
+
     contrib = {"field": field, "data_number": number, "new_data": new_data}
-    
+
     r = requests.put(
         "http://ceptyconsultant.local:8000/api/resource/update_contrib", json=contrib
     )
